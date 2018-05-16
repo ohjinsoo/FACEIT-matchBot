@@ -6,6 +6,8 @@ import json
 import os
 import threading
 
+# Creates the embedded message to showcase a FACEIT match.
+
 async def createEmbed(dictOfGame, currPlayers):
     winningFaction = dictOfGame.get('results').get('winner')
     isFactionOne = False
@@ -16,24 +18,30 @@ async def createEmbed(dictOfGame, currPlayers):
             isFactionOne = True
             break
 
+    color = 0x00ff00
     outcome = ''
     message = ''
     message += currPlayers[0]
     for i in range(1, len(currPlayers)):
         message += ', ' + currPlayers[i]
+
     # WIN CONDITIONS: They are faction one and winning faction is faction1, or they are faction two and winning faction is faction2
+
     if (isFactionOne and winningFaction == 'faction1') or (not isFactionOne and winningFaction == 'faction2'):
         outcome = 'WINNERS'
         message += ' won lul'
     else:
         outcome = "LOSERS"
-        message += ' suck ROFL'
+        message += ' sucks ROFL'
+        color = 0xff0000
 
 
-    embed = discord.Embed(title=outcome, description=message, color=0x00ff00)
+    embed = discord.Embed(title=outcome, description=message, color=color)
 
     return embed
 
+# Split the list into groups that have the gameIds in common. Each gameId is a different game, so each embedded message
+# should have information on only one game.
 
 async def printMatches(playersInGame, gameIds, client):
     for i in range(0, len(playersInGame)):
@@ -50,18 +58,24 @@ async def printMatches(playersInGame, gameIds, client):
 
         faceitLink = os.environ['FACEIT_URL'] + '/matches/' + currGameId
         requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
-        print(requestForJson.json())
+
         if requestForJson.status_code == 404:
             return
 
         dictOfGame = requestForJson.json()
         embed = await createEmbed(dictOfGame, currPlayers)
-        await client.send_message(discord.Object(id='445775038373691395'), embed=embed)
+        await client.send_message(discord.Object(id=os.environ['CHANNEL_ID']), embed=embed)
+
+    # Update the rightBound of match searches, wait 60s, and repeat.
 
     rightBound = int(time.time())
     await asyncio.sleep(60)
     await repeat(client)
 
+
+# Search each of the team members if there is a game that finished
+# between the current time and the time when the bot first logged on.
+# (bot login time will update each time there is a match found)
 
 async def searchForAllMatches(players, client):
     playersInGame = []
@@ -80,11 +94,13 @@ async def searchForAllMatches(players, client):
 
     await printMatches(playersInGame, gameIds, client)
 
+# Gather all of the team member's names and initialize the rightBound of member searches.
+
 faceitLink = os.environ['FACEIT_URL'] + '/teams/' + os.environ['TEAM_ID']
 requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
 dictOfPlayer = requestForJson.json()
 members = dictOfPlayer.get('members')
-rightBound = int(time.time()) - 10000
+rightBound = int(time.time())
 
 async def repeat(c):
     client = c
