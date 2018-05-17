@@ -8,16 +8,56 @@ import os
 import threading
 
 # Creates the embedded message to showcase a FACEIT match.
+# CURRENT INFO GATHERED FOR AN EMBEDDED MESSAGE (currently the same amount of information as ToyBot) :
+
+#           - faceit url to the match page
+#           - server location and map name
+#           - faction name (ie, team_x and team_y)
+#           - the start/end times
+#           - which faction won/lost
+#           - which faction the team we are tracking is in. (if won, msg will be green. if lost, msg will be red)
+#           - the players in faction1
+#           - the players in faction2
+
 
 async def createEmbed(dictOfGame, currPlayers):
+    gameUrl = dictOfGame.get('faceit_url')
+    serverAndMap = dictOfGame.get('voting')
+
+    server = serverAndMap[0].get('location').get('name')
+    mapName = serverAndMap[1].get('map').get('name')
+
+    # Times are in UNIX time.
+
+    startTime = dictOfGame.get('started_at')
+    endTime = dictOfGame.get('finished_at')
+
+
     winningFaction = dictOfGame.get('results').get('winner')
     isFactionOne = False
+
+    # A list with everyone in factionOne and name of factionOne
+
     factionOneList = dictOfGame.get('teams').get('faction1').get('roster_v1')
+    factionOneName = dictOfGame.get('teams').get('faction1').get('name')
+    factionOneMembers = []
     for i in range(0, len(factionOneList)):
         factionOneMember = factionOneList[i].get('nickname')
+        factionOneMembers.append(factionOneMember)
+
+        # Check to see which faction is the team we are tracking is in.
+
         if factionOneMember == currPlayers[0]:
             isFactionOne = True
-            break
+
+    # A list with everyone in factionTwo and name of factionTwo
+
+    factionTwoList = dictOfGame.get('teams').get('faction2').get('roster_v1')
+    factionTwoName = dictOfGame.get('teams').get('faction2').get('name')
+    factionTwoMembers = []
+    for i in range(0, len(factionTwoList)):
+        factionTwoMember = factionTwoList[i].get('nickname')
+        factionTwoMembers.append(factionTwoMember)
 
     color = 0x00ff00
     outcome = ''
@@ -38,7 +78,6 @@ async def createEmbed(dictOfGame, currPlayers):
 
 
     embed = discord.Embed(title=outcome, description=message, color=color)
-    
     return embed
 
 # Split the list into groups that have the gameIds in common. Each gameId is a different game, so each embedded message
