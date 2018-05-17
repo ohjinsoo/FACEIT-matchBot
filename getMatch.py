@@ -25,7 +25,7 @@ async def createEmbed(dictOfGame, currPlayers):
     serverAndMap = dictOfGame.get('voting')
 
     server = serverAndMap[0].get('location').get('name')
-    mapName = serverAndMap[1].get('map').get('name')
+    mapName = serverAndMap[0].get('map').get('name')
 
     # Times are in UNIX time.
 
@@ -85,15 +85,21 @@ async def createEmbed(dictOfGame, currPlayers):
 
 async def printMatches(playersInGame, gameIds, client):
     for i in range(0, len(playersInGame)):
+        if (i >= len(playersInGame)):
+            break
+        print('this is i ' + str(i))
         currGameId = gameIds[i]
         currPlayers = []
         currPlayers.append(playersInGame[i])
-        for j in range(i + 1, len(playersInGame)):
+        j = i + 1
+        while j < len(playersInGame):
+            print('this is j ' + str(j))
             if currGameId == gameIds[j]:
                 currPlayers.append(playersInGame[j])
                 del gameIds[j]
                 del playersInGame[j]
                 j = j - 1
+            j = j + 1
 
 
         faceitLink = os.environ['FACEIT_URL'] + '/matches/' + currGameId
@@ -146,7 +152,7 @@ faceitLink = os.environ['FACEIT_URL'] + '/teams/' + os.environ['TEAM_ID']
 requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
 dictOfPlayer = requestForJson.json()
 members = dictOfPlayer.get('members')
-rightBound = int(time.time())
+rightBound = int(time.time()) - 6000
 
 async def repeat(c):
     client = c
