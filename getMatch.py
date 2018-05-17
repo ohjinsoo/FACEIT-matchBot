@@ -38,7 +38,6 @@ async def createEmbed(dictOfGame, currPlayers):
 
 
     embed = discord.Embed(title=outcome, description=message, color=color)
-
     return embed
 
 # Split the list into groups that have the gameIds in common. Each gameId is a different game, so each embedded message
