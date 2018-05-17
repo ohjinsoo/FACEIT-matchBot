@@ -1,4 +1,5 @@
 import discord
+import aiohttp
 import asyncio
 import requests
 import time
@@ -57,14 +58,16 @@ async def printMatches(playersInGame, gameIds, client):
 
 
         faceitLink = os.environ['FACEIT_URL'] + '/matches/' + currGameId
-        requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
+        # requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
+        headers={"Authorization": os.environ['FACEIT_KEY']}
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.get(faceitLink) as requestForJson:
+                if requestForJson.status == 404:
+                    return
 
-        if requestForJson.status_code == 404:
-            return
-
-        dictOfGame = requestForJson.json()
-        embed = await createEmbed(dictOfGame, currPlayers)
-        await client.send_message(discord.Object(id=os.environ['CHANNEL_ID']), embed=embed)
+                dictOfGame = await requestForJson.json()
+                embed = await createEmbed(dictOfGame, currPlayers)
+                await client.send_message(discord.Object(id=os.environ['CHANNEL_ID']), embed=embed)
 
     # Update the rightBound of match searches, wait 60s, and repeat.
 
@@ -84,17 +87,21 @@ async def searchForAllMatches(players, client):
     for i in range(0, len(players)):
         player = players[i]
         faceitLink = os.environ['FACEIT_URL'] + '/players/' + player['user_id'] + '/history?game=csgo&from=' + str(rightBound) + '&offset=0&limit=1'
-        requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
-        dictOfGames = requestForJson.json()
-
-        if len(dictOfGames.get('items')) != 0:
-            gameId = dictOfGames.get('items')[0].get('match_id')
-            playersInGame.append(player['nickname'])
-            gameIds.append(gameId)
+        # requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
+        headers={"Authorization": os.environ['FACEIT_KEY']}
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.get(faceitLink) as requestForJson:
+                dictOfGames = await requestForJson.json()
+                print(dictOfGames)
+                if requestForJson.status == 200 and len(dictOfGames.get('items')) != 0:
+                    gameId = dictOfGames.get('items')[0].get('match_id')
+                    playersInGame.append(player['nickname'])
+                    gameIds.append(gameId)
 
     await printMatches(playersInGame, gameIds, client)
 
 # Gather all of the team member's names and initialize the rightBound of member searches.
+# Requests is used here only because can't use 'async with aiohttp' as a global variable.
 
 faceitLink = os.environ['FACEIT_URL'] + '/teams/' + os.environ['TEAM_ID']
 requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
