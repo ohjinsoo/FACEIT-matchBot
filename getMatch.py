@@ -1,10 +1,9 @@
 import discord
 import aiohttp
 import asyncio
-import requests
 import time
 import json
-import os
+import os.path
 import threading
 
 # Creates the embedded message to showcase a FACEIT match.
@@ -20,7 +19,7 @@ import threading
 #           - the players in faction2
 
 
-async def createEmbed(dictOfGame, currPlayers):
+async def createMatchEmbed(dictOfGame, currPlayers):
     gameUrl = dictOfGame.get('faceit_url')
     serverAndMap = dictOfGame.get('voting')
 
@@ -103,7 +102,6 @@ async def printMatches(playersInGame, gameIds, client):
 
 
         faceitLink = os.environ['FACEIT_URL'] + '/matches/' + currGameId
-        # requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
         headers={"Authorization": os.environ['FACEIT_KEY']}
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(faceitLink) as requestForJson:
@@ -111,7 +109,7 @@ async def printMatches(playersInGame, gameIds, client):
                     return
 
                 dictOfGame = await requestForJson.json()
-                embed = await createEmbed(dictOfGame, currPlayers)
+                embed = await createMatchEmbed(dictOfGame, currPlayers)
                 await client.send_message(discord.Object(id=os.environ['CHANNEL_ID']), embed=embed)
 
     # Update the rightBound of match searches, wait 60s, and repeat.
@@ -132,7 +130,6 @@ async def searchForAllMatches(players, client):
     for i in range(0, len(players)):
         player = players[i]
         faceitLink = os.environ['FACEIT_URL'] + '/players/' + player['user_id'] + '/history?game=csgo&from=' + str(rightBound) + '&offset=0&limit=1'
-        # requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
         headers={"Authorization": os.environ['FACEIT_KEY']}
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(faceitLink) as requestForJson:
@@ -148,14 +145,25 @@ async def searchForAllMatches(players, client):
 # Gather all of the team member's names and initialize the rightBound of member searches.
 # Requests is used here only because can't use 'async with aiohttp' as a global variable.
 
-faceitLink = os.environ['FACEIT_URL'] + '/teams/' + os.environ['TEAM_ID']
-requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
-dictOfPlayer = requestForJson.json()
-members = dictOfPlayer.get('members')
-rightBound = int(time.time()) - 6000
+
+members = {}
+rightBound = int(time.time())
+
+# Initialize members here. Don't need to do it more than once as the teams should not change.
+# If a member is added to the team, simply restart bot.
+# (should we re-initialize teams every minute so you do't have to restart bot? Very rarely are teams changed, so I dunno)
+
+async def initRepeat(c):
+    client = c
+    faceitLink = os.environ['FACEIT_URL'] + '/teams/' + os.environ['TEAM_ID']
+    headers={"Authorization": os.environ['FACEIT_KEY']}
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(faceitLink) as requestForJson:
+            dictOfPlayer = await requestForJson.json()
+            members = dictOfPlayer.get('members')
+            await searchForAllMatches(members, client)
 
 async def repeat(c):
     client = c
-    print(rightBound)
     await searchForAllMatches(members, client)
 

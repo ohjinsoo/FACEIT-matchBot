@@ -3,11 +3,10 @@ import aiohttp
 import asyncio
 import websockets
 import json
-import os
+import os.path
 
 import getMatch 
 from models.Player import Player
-
 
 client = discord.Client()
 
@@ -19,7 +18,7 @@ async def on_ready():
 
 		# Start 60s timer to look for FACEIT matches.
 
-		await getMatch.repeat(client)
+		await getMatch.initRepeat(client)
 
 def as_player(d):
 	ret = Player()
@@ -48,8 +47,6 @@ async def on_message(message):
 		headers={"Authorization": os.environ['FACEIT_KEY']}
 		async with aiohttp.ClientSession(headers=headers) as session:
 			async with session.get(faceitLink) as requestForJson:
-
-				# requestForJson = requests.get(faceitLink, headers={"Authorization": os.environ['FACEIT_KEY']})
 				dictOfPlayer = await requestForJson.json()
 
 				# No permission to post or user does not exist.
