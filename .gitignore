@@ -1,3 +1,4 @@
 .env
 .DS_Store
-Pipefile
+.vscode/
+__pycache__/*

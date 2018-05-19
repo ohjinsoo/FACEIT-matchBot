@@ -3,10 +3,14 @@ import aiohttp
 import asyncio
 import websockets
 import json
-import os.path
+import os
 
-import getMatch 
+import getMatch
 from models.Player import Player
+
+FACEIT_URL = os.getenv('FACEIT_URL')
+FACEIT_KEY = os.getenv('FACEIT_KEY')
+BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 client = discord.Client()
 
@@ -42,9 +46,11 @@ async def createStatsEmbed(player1):
 async def on_message(message):
 	if message.content.startswith('.stats '):
 		player_nick = message.content[7:]
-		faceitLink = os.environ['FACEIT_URL'] + '/players?nickname=' + player_nick + '&game=csgo'
+		faceitLink = FACEIT_URL + '/players?nickname=' + player_nick + '&game=csgo'
 
-		headers={"Authorization": os.environ['FACEIT_KEY']}
+		print(faceitLink)
+
+		headers = {"Authorization": FACEIT_KEY}
 		async with aiohttp.ClientSession(headers=headers) as session:
 			async with session.get(faceitLink) as requestForJson:
 				dictOfPlayer = await requestForJson.json()
@@ -69,10 +75,10 @@ async def on_message(message):
 				player1.faceit_elo = dictOfPlayer.get('games').get('csgo').get('faceit_elo')
 				player1.faceit_url = dictOfPlayer.get('faceit_url')[0:23] + "en/" + dictOfPlayer.get('faceit_url')[30:]
 
-				faceitLink = os.environ['FACEIT_URL'] + '/players/' + player1.player_id + '/stats/csgo'
+				faceitLink = FACEIT_URL + '/players/' + player1.player_id + '/stats/csgo'
 				async with session.get(faceitLink) as requestForJson:
 					dictOfPlayerStats = await requestForJson.json()
-					
+
 					if requestForJson.status != 200:
 						await client.send_message(message.channel, player1.nickname + ' has no stats for CSGO.')
 						return
@@ -86,5 +92,4 @@ async def on_message(message):
 
 					await client.send_message(message.channel, embed=embed)
 
-
-client.run(os.environ['BOT_TOKEN'])
+client.run(BOT_TOKEN)
