@@ -1,3 +1,5 @@
+from config import FACEIT_URL, FACEIT_KEY, BOT_TOKEN
+
 import discord
 import aiohttp
 import asyncio
@@ -7,22 +9,16 @@ import os
 
 import getMatch
 from models.Player import Player
-
-FACEIT_URL = os.getenv('FACEIT_URL')
-FACEIT_KEY = os.getenv('FACEIT_KEY')
-BOT_TOKEN = os.getenv('BOT_TOKEN')
+from utils.Api import Api
 
 client = discord.Client()
 
 @client.event
 async def on_ready():
-		print('Logged in as')
-		print(client.user.name)
-		print(client.user.id)
+	print('Logged in as: %s [%s]' % (client.user.name, client.user.id))
 
-		# Start 60s timer to look for FACEIT matches.
-
-		await getMatch.initRepeat(client)
+	# Start 60s timer to look for FACEIT matches.
+	await getMatch.initRepeat(client)
 
 def as_player(d):
 	ret = Player()
@@ -30,66 +26,73 @@ def as_player(d):
 	return ret
 
 
-async def createStatsEmbed(player1):
-
+async def createStatsEmbed(player):
 	embed = discord.Embed(color=0xC9FFFF)
-	embed.add_field(name='Level', value=player1.skill_level, inline=True)
-	embed.add_field(name='ELO', value=player1.faceit_elo, inline=True)
-	embed.add_field(name='Headshot %', value=player1.headshotPercentage + ' %', inline=True)
-	embed.add_field(name='Matches Played', value=player1.matches, inline=True)
-	embed.add_field(name='Win %', value=player1.winRate + ' %', inline=True)
-	embed.add_field(name='AVG. K/D Ratio', value=player1.kdRatio, inline=True)
-	embed.set_author(name=player1.nickname, icon_url=player1.avatar, url=player1.faceit_url)
+	embed.set_author(name=player.nickname, icon_url=player.avatar, url=player.faceit_url)
+
+	fields = {
+		'name': player.skill_level,
+		'ELO': player.faceit_elo,
+		'Headshot %': player.headshotPercentage + ' %',
+		'Matches Played': player.matches,
+		'Win %': player.winRate,
+		'AVG. K/D Ratio': player.kdRatio,
+	}
+
+	for name, value in fields.items():
+		embed.add_field(name=name, value=value, inline=True)
+
 	return embed
 
 @client.event
 async def on_message(message):
 	if message.content.startswith('.stats '):
 		player_nick = message.content[7:]
-		faceitLink = FACEIT_URL + '/players?nickname=' + player_nick + '&game=csgo'
 
-		print(faceitLink)
+		playerRes = await Api.getPlayer(player_nick)
+		# No permission to post or user does not exist.
+		if playerRes.status != 200:
+			await client.send_message(message.channel, 'No such player found. (stats is case sensitive)')
+			return
 
-		headers = {"Authorization": FACEIT_KEY}
-		async with aiohttp.ClientSession(headers=headers) as session:
-			async with session.get(faceitLink) as requestForJson:
-				dictOfPlayer = await requestForJson.json()
+		playerResData = await playerRes.json()
 
-				# No permission to post or user does not exist.
+		playerData = {
+			'player_id': playerResData.get('player_id'),
+			'nickname': playerResData.get('nickname'),
+			'avatar': playerResData.get('avatar'),
+			'faceit_url': playerResData.get('faceit_url')[0:23] + "en/" + playerResData.get('faceit_url')[30:],
+		}
 
-				if requestForJson.status != 200:
-					await client.send_message(message.channel, 'No such player found. (stats is case sensitive)')
-					return
+		if 'csgo' not in playerResData.get('games'):
+			await client.send_message(message.channel, playerData['nickname'] + ' has no stats for CSGO.')
+			return
 
-				if 'csgo' not in dictOfPlayer.get('games'):
-					await client.send_message(message.channel, player_nick + ' has no stats for CSGO.')
-					return
+		playerData.update({
+			'skill_level': playerResData.get('games').get('csgo').get('skill_level'),
+			'faceit_elo': playerResData.get('games').get('csgo').get('faceit_elo'),
+		})
 
-				# Only grab nickname, level, elo, and url as that is the only relevant variables.
+		playerStatsRes = await Api.getPlayerStats(playerData['player_id'])
 
-				player1 = Player()
-				player1.player_id = dictOfPlayer.get('player_id')
-				player1.nickname = dictOfPlayer.get('nickname')
-				player1.avatar = dictOfPlayer.get('avatar')
-				player1.skill_level = dictOfPlayer.get('games').get('csgo').get('skill_level')
-				player1.faceit_elo = dictOfPlayer.get('games').get('csgo').get('faceit_elo')
-				player1.faceit_url = dictOfPlayer.get('faceit_url')[0:23] + "en/" + dictOfPlayer.get('faceit_url')[30:]
+		if playerStatsRes.status != 200:
+			await client.send_message(message.channel, playerData['nickname'] + ' has no stats for CSGO.')
+			return
 
-				faceitLink = FACEIT_URL + '/players/' + player1.player_id + '/stats/csgo'
-				async with session.get(faceitLink) as requestForJson:
-					dictOfPlayerStats = await requestForJson.json()
+		playerStatsResData = await playerStatsRes.json()
 
-					if requestForJson.status != 200:
-						await client.send_message(message.channel, player1.nickname + ' has no stats for CSGO.')
-						return
+		playerData.update({
+			'headshotPercentage': playerStatsResData.get('lifetime').get('Average Headshots %'),
+			'matches': playerStatsResData.get('lifetime').get('Matches'),
+			'winRate': playerStatsResData.get('lifetime').get('Win Rate %'),
+			'kdRatio': playerStatsResData.get('lifetime').get('Average K/D Ratio'),
+		})
 
-					player1.headshotPercentage = dictOfPlayerStats.get('lifetime').get('Average Headshots %')
-					player1.matches = dictOfPlayerStats.get('lifetime').get('Matches')
-					player1.winRate = dictOfPlayerStats.get('lifetime').get('Win Rate %')
-					player1.kdRatio = dictOfPlayerStats.get('lifetime').get('Average K/D Ratio')
+		player = Player()
+		player.__dict__.update(playerData)
 
-					embed = await createStatsEmbed(player1)
+		embed = await createStatsEmbed(player)
 
-					await client.send_message(message.channel, embed=embed)
+		await client.send_message(message.channel, embed=embed)
 
 client.run(BOT_TOKEN)
