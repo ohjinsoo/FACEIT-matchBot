@@ -4,12 +4,7 @@ import asyncio
 import time
 import json
 import threading
-import os
-
-FACEIT_URL = os.getenv('FACEIT_URL')
-FACEIT_KEY = os.getenv('FACEIT_KEY')
-TEAM_ID = os.getenv('TEAM_ID')
-CHANNEL_ID = os.getenv('CHANNEL_ID')
+from config import FACEIT_URL, FACEIT_KEY, TEAM_ID, CHANNEL_ID
 
 # Creates the embedded message to showcase a FACEIT match.
 # CURRENT INFO GATHERED FOR AN EMBEDDED MESSAGE (currently the same amount of information as ToyBot) :
