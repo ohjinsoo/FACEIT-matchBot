@@ -115,8 +115,6 @@ async def printMatches(playersInGame, gameIds, client):
     # Update the rightBound of match searches, wait 60s, and repeat.
 
     rightBound = int(time.time())
-    await asyncio.sleep(60)
-    await repeat(client)
 
 
 # Search each of the team members if there is a game that finished
@@ -128,6 +126,9 @@ async def searchForAllMatches(players, client):
     gameIds = []
 
     print('players', players)
+
+    if players is None:
+        return
 
     for i in range(0, len(players)):
         player = players[i]
@@ -155,17 +156,19 @@ rightBound = int(time.time())
 # If a member is added to the team, simply restart bot.
 # (should we re-initialize teams every minute so you do't have to restart bot? Very rarely are teams changed, so I dunno)
 
-async def initRepeat(c):
-    client = c
+
+async def initRepeat(client):
     faceitLink = FACEIT_URL + '/teams/' + TEAM_ID
     headers={"Authorization": FACEIT_KEY}
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(faceitLink) as requestForJson:
             dictOfPlayer = await requestForJson.json()
             members = dictOfPlayer.get('members')
-            await searchForAllMatches(members, client)
+            await repeat(client)
 
-async def repeat(c):
-    client = c
+
+async def repeat(client):
     await searchForAllMatches(members, client)
+    await asyncio.sleep(60)
+    await repeat(client)
 
