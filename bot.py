@@ -6,9 +6,9 @@ import asyncio
 import websockets
 import json
 
-import getMatch
+from match import matchStats
 from models.Player import Player
-from commands.stats import stats
+from commands.playerStats import stats
 
 client = discord.Client()
 
@@ -17,12 +17,7 @@ async def on_ready():
     print('Logged in as: %s [%s]' % (client.user.name, client.user.id))
 
     # Start 60s timer to look for FACEIT matches.
-    await getMatch.initRepeat(client)
-
-def as_player(d):
-    ret = Player()
-    ret.__dict__.update(d)
-    return ret
+    await matchStats.startMatchSearch(client)
 
 @client.event
 async def on_message(message):

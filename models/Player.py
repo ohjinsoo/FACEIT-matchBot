@@ -1,5 +1,3 @@
-import json
-
 class Player:
     player_id = ''
     nickname = ''

@@ -59,7 +59,7 @@ async def createStatsEmbed(player):
 	                 icon_url=player.avatar, url=player.faceit_url)
 
 	fields = {
-		'name': player.skill_level,
+		'Level': player.skill_level,
 		'ELO': player.faceit_elo,
 		'Headshot %': player.headshotPercentage + ' %',
 		'Matches Played': player.matches,
