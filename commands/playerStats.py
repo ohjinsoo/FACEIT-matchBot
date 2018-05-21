@@ -54,20 +54,20 @@ async def stats(client, message):
   await client.send_message(message.channel, embed=embed)
 
 async def createStatsEmbed(player):
-	embed = discord.Embed(color=0xC9FFFF)
-	embed.set_author(name=player.nickname,
-	                 icon_url=player.avatar, url=player.faceit_url)
+  embed = discord.Embed(color=0xC9FFFF)
+  embed.set_author(name=player.nickname,
+                   icon_url=player.avatar, url=player.faceit_url)
 
-	fields = {
-		'Level': player.skill_level,
-		'ELO': player.faceit_elo,
-		'Headshot %': player.headshotPercentage + ' %',
-		'Matches Played': player.matches,
-		'Win %': player.winRate,
-		'AVG. K/D Ratio': player.kdRatio,
-	}
+  fields = {
+    'Level': player.skill_level,
+    'ELO': player.faceit_elo,
+    'Headshot %': player.headshotPercentage + ' %',
+    'Matches Played': player.matches,
+    'Win %': player.winRate,
+    'AVG. K/D Ratio': player.kdRatio,
+  }
 
-	for name, value in fields.items():
-		embed.add_field(name=name, value=value, inline=True)
+  for name, value in fields.items():
+    embed.add_field(name=name, value=value, inline=True)
 
-	return embed
+  return embed

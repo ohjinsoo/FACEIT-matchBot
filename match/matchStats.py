@@ -9,6 +9,14 @@ from config import CHANNEL_ID
 from models.Match import Match
 from utils.Api import Api
 
+async def parsePlayerList(playerList):
+  ret = ''
+
+  for i in range(0, len(playerList)):
+    ret += playerList[i] + '\n'
+
+  return str(ret)
+
 # Creates the embedded message to showcase a FACEIT match.
 # CURRENT INFO GATHERED FOR AN EMBEDDED MESSAGE (currently the same amount of information as ToyBot) :
 
@@ -31,37 +39,44 @@ async def createMatchEmbed(match, currPlayers):
       isFactionOne = True
       break
 
-  color = 0x00ff00
-  outcome = currPlayers[0]
-  for i in range(1, len(currPlayers)):
-    outcome += ', ' + currPlayers[i]
+  # color = red
+  color = 0xff0000
 
-
+  # If winner, make embed green. 
   if (isFactionOne and match.winner == 'faction1') or (not isFactionOne and match.winner == 'faction2'):
-    outcome += ' won!'
-  else:
-    outcome += " lost :( "
-    color = 0xff0000
+    color = 0x00ff00
 
-  startTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(match.start))
-  endTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(match.end))
+  startTime = time.strftime('%B %d,  %I:%M %p', time.localtime(match.start))
+  endTime = time.strftime('%B %d,  %I:%M %p', time.localtime(match.end))
 
   matchFields = {
-    'Server Location: ': match.server,
-    'Map: ': match.mapName,
+
+    match.factionOneName : await parsePlayerList(match.factionOne),
+    match.factionTwoName : await parsePlayerList(match.factionTwo),
+
+    'Map' : match.mapName,
+    'Server Location' : match.server,
+
+    '\u200b' : '------------------------------------------------------------------------------',
 
     'Start Time: ': startTime,
-    'End Time: ': endTime,
+    'End Time: ': endTime
   }
 
-  embed = discord.Embed(color=color)
-  embed.set_author(name=outcome,
+  print('OMEGALULLLL ' + str(matchFields))
+
+  title = match.factionOneName + ' vs. ' + match.factionTwoName
+  embed = discord.Embed(color=color, description='------------------------------------------------------------------------------')
+  embed.set_author(name=title,
     # not sure what kind of icon i should put, so i put faceit icon from steam as a placeholder
                    icon_url='https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg',url=match.matchUrl)
 
   for name, value in matchFields.items():
     embed.add_field(name=name, value=value, inline=True)
 
+  # Adds an empty field at the bottom to make the embed look cleaner
+  embed.add_field(name='\u200b', value='\u200b', inline=False)
+  embed.set_footer(text='\u200b')
   return embed
 
 
@@ -107,11 +122,11 @@ async def printMatches(playersInGame, gameIds, client):
 
     for i in range(0, len(factionOneList)):
       mem = factionOneList[i].get('nickname')
-      factionOneMembers.append(mem)
+      factionOneMembers.append(str(mem))
 
     for i in range(0, len(factionTwoList)):
       mem = factionTwoList[i].get('nickname')
-      factionTwoMembers.append(mem)
+      factionTwoMembers.append(str(mem))
 
     matchData = {
       'matchId' : matchResData.get('match_id'),
@@ -125,7 +140,7 @@ async def printMatches(playersInGame, gameIds, client):
       'winner' : matchResData.get('results').get('winner'),
 
       'factionOneName' : factionOne.get('name'),
-      'factionOneName' : factionTwo.get('name'),
+      'factionTwoName' : factionTwo.get('name'),
 
       'factionOne' : factionOneMembers,
       'factionTwo' : factionTwoMembers
@@ -136,7 +151,19 @@ async def printMatches(playersInGame, gameIds, client):
 
     addToDatabase.append(match)
     embed = await createMatchEmbed(match, currPlayers)
-    await client.send_message(discord.Object(id=CHANNEL_ID), embed=embed)
+
+    outcome = '**' + currPlayers[0] + '**'
+    for i in range(1, len(currPlayers)):
+      outcome += ', **' + currPlayers[i] + '**'
+
+    # if embed == green, add ' won!' , else add ' lost :('
+    if embed.color == 0x00ff00:
+      outcome += ' won their match!'
+    else:
+      outcome += ' lost their match:('
+
+    message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome  )
+    await client.edit_message(message=message, embed=embed)
 
 
 
