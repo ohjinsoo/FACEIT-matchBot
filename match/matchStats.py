@@ -43,12 +43,15 @@ async def createMatchEmbed(match, currPlayers):
 		outcome += " lost :thinking:"
 		color = 0xff0000
 
+	startTime =	time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(match.start))
+	endTime =	time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(match.end))
+
 	matchFields = {
 		'Server Location: ': match.server,
 		'Map: ': match.mapName,
 
-		'Start Time: ': match.start,
-		'End Time: ': match.end,
+		'Start Time: ': startTime,
+		'End Time: ': endTime,
 	}
 
 	embed = discord.Embed(color=color)
@@ -128,19 +131,18 @@ async def printMatches(playersInGame, gameIds, client):
 
 		match = Match()
 		match.__dict__.update(matchData)
+
+		addToDatabase.append(match)
 		embed = await createMatchEmbed(match, currPlayers)
 		await client.send_message(discord.Object(id=CHANNEL_ID), embed=embed)
 
-	# Update the rightBound of match searches, wait 60s, and repeat.
-
-	rightBound = int(time.time())
 
 
 # Search each of the team members if there is a game that finished
 # between the current time and the time when the bot first logged on.
 # (bot login time will update each time there is a match found)
 
-async def searchForAllMatches(players, client):
+async def searchForAllMatches(players, client, rightBound):
 	playersInGame = []
 	gameIds = []
 
@@ -169,17 +171,20 @@ async def searchForAllMatches(players, client):
 async def startMatchSearch(client):
 	teamRes = await Api.getTeamMembers()
 	teamResData = await teamRes.json()
-	print('porque?')
-	print(teamResData)
 	members = teamResData.get('members')
-	await searchForAllMatches(members, client)
+	rightBound = int(time.time()) - 86400
+	await matchSearch(client, members, rightBound)
 
 
-async def matchSearch(client):
-	await searchForAllMatches(members, client)
-	await asyncio.sleep(5)
-	await matchSearch(client)
+async def matchSearch(client, members, rightBound):
+	await searchForAllMatches(members, client, rightBound)
+	await asyncio.sleep(10)
+
+	# Update the rightBound of match searches.
+	rightBound = int(time.time())
+
+	await matchSearch(client, members, rightBound)
 
 
-members = {}
-rightBound = int(time.time()) - 86400
+addToDatabase = []
+
