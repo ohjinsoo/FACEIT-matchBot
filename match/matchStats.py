@@ -76,7 +76,7 @@ async def createMatchEmbed(match, currPlayers):
   # Adds an empty field at the bottom to make the embed look cleaner
   embed.add_field(name='\u200b', value='\u200b', inline=False)
   embed.set_footer(text='\u200b')
-  
+
   return embed
 
 
@@ -130,7 +130,7 @@ async def printMatches(playersInGame, gameIds, client):
 
     matchData = {
       'matchId' : matchResData.get('match_id'),
-      'matchUrl' : matchResData.get('faceit_url'),
+      'matchUrl' : matchResData.get('faceit_url')[0:23] + "en/" + matchResData.get('faceit_url')[30:],
 
       'server': serverAndMap[0].get('location').get('name'),
       'mapName' : serverAndMap[0].get('map').get('name'),
