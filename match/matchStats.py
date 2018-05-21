@@ -55,15 +55,14 @@ async def createMatchEmbed(match, currPlayers):
     match.factionTwoName : await parsePlayerList(match.factionTwo),
 
     'Map' : match.mapName,
-    'Server Location' : match.server,
 
     '\u200b' : '------------------------------------------------------------------------------',
 
     'Start Time: ': startTime,
-    'End Time: ': endTime
+    'End Time: ': endTime,
+    'Server Location' : match.server
   }
 
-  print('OMEGALULLLL ' + str(matchFields))
 
   title = match.factionOneName + ' vs. ' + match.factionTwoName
   embed = discord.Embed(color=color, description='------------------------------------------------------------------------------')
@@ -77,6 +76,7 @@ async def createMatchEmbed(match, currPlayers):
   # Adds an empty field at the bottom to make the embed look cleaner
   embed.add_field(name='\u200b', value='\u200b', inline=False)
   embed.set_footer(text='\u200b')
+  
   return embed
 
 
@@ -160,9 +160,9 @@ async def printMatches(playersInGame, gameIds, client):
     if embed.color == 0x00ff00:
       outcome += ' won their match!'
     else:
-      outcome += ' lost their match:('
+      outcome += ' lost their match :('
 
-    message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome  )
+    message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome)
     await client.edit_message(message=message, embed=embed)
 
 
