@@ -24,3 +24,7 @@ class Api:
   @staticmethod
   async def getMatchInfo(gameId):
     return await request.get('/matches/' + gameId)
+
+  @staticmethod
+  async def getMatchStats(gameId):
+    return await request.get('/matches/' + gameId + '/stats')

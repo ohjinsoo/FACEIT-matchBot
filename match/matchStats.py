@@ -4,6 +4,7 @@ import asyncio
 import time
 import json
 import threading
+import MySQLdb
 from config import CHANNEL_ID
 from models.Match import Match
 from utils.Api import Api
@@ -31,8 +32,7 @@ async def createMatchEmbed(match, currPlayers):
       break
 
   color = 0x00ff00
-  outcome = ''
-  outcome += currPlayers[0]
+  outcome = currPlayers[0]
   for i in range(1, len(currPlayers)):
     outcome += ', ' + currPlayers[i]
 
@@ -40,7 +40,7 @@ async def createMatchEmbed(match, currPlayers):
   if (isFactionOne and match.winner == 'faction1') or (not isFactionOne and match.winner == 'faction2'):
     outcome += ' won!'
   else:
-    outcome += " lost :thinking:"
+    outcome += " lost :( "
     color = 0xff0000
 
   startTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(match.start))
@@ -114,7 +114,9 @@ async def printMatches(playersInGame, gameIds, client):
       factionTwoMembers.append(mem)
 
     matchData = {
+      'matchId' : matchResData.get('match_id'),
       'matchUrl' : matchResData.get('faceit_url'),
+
       'server': serverAndMap[0].get('location').get('name'),
       'mapName' : serverAndMap[0].get('map').get('name'),
       'start' : matchResData.get('started_at'),
@@ -163,27 +165,46 @@ async def searchForAllMatches(players, client, rightBound):
 
   await printMatches(playersInGame, gameIds, client)
 
+# After getting match info about a new match, it will take a long time for FACEIT to have statistics ready.
+# Because of this, whenever a match info is found, add it to 'addToDatabase' array.
+# If array is not empty, ask FACEIT for statistics. If status != 200, do nothing.
+# If status == 200, take all of the statistics from team members and update the MySQL database.
+
+async def addMatchToDatabase():
+  if len(addToDatabase) == 0:
+    return
+
+  for i in range(0, len(addToDatabase)):
+    matchInfoRes = await Api.getMatchStats(addToDatabase[i])
+
+    if matchInfoRes.status == 200:
+
+      # Connect to test mysql database
+      db = MySQLdb.connect(host='localhost', user='root', passwd='test123', db='matchBot')
+      cur = db.cursor()
+
+
+
 # Initialize members here. Don't need to do it more than once as the teams should not change.
 # If a member is added to the team, simply restart bot.
-# (should we re-initialize teams every minute so you do't have to restart bot? Very rarely are teams changed, so I dunno)
-
 
 async def startMatchSearch(client):
   teamRes = await Api.getTeamMembers()
   teamResData = await teamRes.json()
   members = teamResData.get('members')
-  rightBound = int(time.time()) - 86400
+  rightBound = int(time.time())
   await matchSearch(client, members, rightBound)
 
 
 async def matchSearch(client, members, rightBound):
   await searchForAllMatches(members, client, rightBound)
-  await asyncio.sleep(10)
+  await asyncio.sleep(60)
 
   # Update the rightBound of match searches.
   rightBound = int(time.time())
 
   await matchSearch(client, members, rightBound)
+  await addMatchToDatabase()
 
 
 addToDatabase = []

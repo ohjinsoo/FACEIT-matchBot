@@ -9,6 +9,7 @@ import json
 from match import matchStats
 from models.Player import Player
 from commands.playerStats import stats
+from commands.showTrackedPlayers import showPlayers
 
 client = discord.Client()
 
@@ -23,5 +24,8 @@ async def on_ready():
 async def on_message(message):
     if message.content.startswith('.stats '):
         await stats(client, message)
+
+    elif message.content.startswith('.players'):
+        await showPlayers(client, message)
 
 client.run(BOT_TOKEN)

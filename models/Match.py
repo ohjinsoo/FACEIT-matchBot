@@ -1,14 +1,15 @@
 class Match:
-	matchUrl = ''
-	server = ''
-	mapName = ''
-	start = 0
-	end = 0
+  matchId = ''
+  matchUrl = ''
+  server = ''
+  mapName = ''
+  start = 0
+  end = 0
 
-	winner = ''
+  winner = ''
 
-	factionOneName = ''
-	factionTwoName = ''
+  factionOneName = ''
+  factionTwoName = ''
 
-	factionOne = []
-	factionTwo = []
+  factionOne = []
+  factionTwo = []
