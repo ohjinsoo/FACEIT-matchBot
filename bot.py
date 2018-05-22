@@ -19,10 +19,8 @@ client = discord.Client()
 async def on_ready():
     print('Logged in as: %s [%s]' % (client.user.name, client.user.id))
 
-    await DBQuery.insertPlayer('Imran', 5, 5, 10)
-
     # Start 60s timer to look for FACEIT matches.
-    # await matchInfo.startMatchSearch(client)
+    await matchInfo.startMatchSearch(client)
 
 @client.event
 async def on_message(message):

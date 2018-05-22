@@ -6,17 +6,19 @@ class Database:
   db = MySQLdb.connect(host='localhost', user='root', passwd='jinsooftw', db='matchBot')
   cur = db.cursor()
 
-  async def get(self, command):
-    print('get: %s' % command)
-    body = self.cur.execute(command)
+  async def get(self, command, seq):
+    log = command % seq
+    print('get: %s' % log)
+    body = self.cur.execute(command, seq)
     db.commit()
     return body
 
+  async def execute(self, command, seq):
+    log = command % seq
+    print('execute: %s' % log)
+    self.cur.execute(command, seq)
+    self.db.commit()
 
-# bug where its telling me db doesnt exist when i try db.commit()   :( :( :(
-  async def execute(self, command):
-    print('execute: %s' % command)
-    self.cur.execute(command)
-    db.commit()
-
+  def __del__(self):
+    self.db.close()
 

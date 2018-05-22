@@ -31,20 +31,11 @@ async def parsePlayerList(playerList):
 #           - the players in faction2
 
 async def createMatchEmbed(match, currPlayers):
-
-  isFactionOne = False
-  factionOneList = match.factionOne
-
-  for i in range(0, len(factionOneList)):
-    if factionOneList[i] == currPlayers[0]:
-      isFactionOne = True
-      break
-
   # color = red
   color = 0xff0000
 
   # If winner, make embed green. 
-  if (isFactionOne and match.winner == 'faction1') or (not isFactionOne and match.winner == 'faction2'):
+  if (match.isFactionOne and match.winner == 'faction1') or (not match.isFactionOne and match.winner == 'faction2'):
     color = 0x00ff00
 
   startTime = time.strftime('%B %d,  %I:%M %p', time.localtime(match.start))
@@ -118,12 +109,16 @@ async def printMatches(playersInGame, gameIds, client):
 
     factionOneMembers = []
     factionTwoMembers = []
+    isFactionOne = False
 
     # Made two separate for loops just incase it is a match with uneven teams (for whatever reason)
 
     for i in range(0, len(factionOneList)):
       mem = factionOneList[i].get('nickname')
       factionOneMembers.append(str(mem))
+
+      if mem == playersInGame[0]:
+        isFactionOne = True
 
     for i in range(0, len(factionTwoList)):
       mem = factionTwoList[i].get('nickname')
@@ -145,6 +140,7 @@ async def printMatches(playersInGame, gameIds, client):
 
       'factionOne' : factionOneMembers,
       'factionTwo' : factionTwoMembers
+      'isFactionOne' : isFactionOne
     }
 
     match = Match()
@@ -214,7 +210,7 @@ async def matchSearch(client, members, rightBound):
 
   if len(addToDatabase) != 0:
     for i in range(0, len(addToDatabase)):
-      await matchStats.addMatchToDatabase(addToDatabase[i])
+      await matchStats.addMatchToDatabase(addToDatabase[i], members)
 
   await matchSearch(client, members, rightBound)
   

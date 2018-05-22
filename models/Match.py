@@ -13,3 +13,5 @@ class Match:
 
   factionOne = []
   factionTwo = []
+
+  isFactionOne = False
