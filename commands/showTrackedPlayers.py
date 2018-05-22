@@ -13,17 +13,15 @@ async def showPlayers(client, message):
   teamUrl = teamResData.get('faceit_url')[0:23] + "en/" + teamResData.get('faceit_url')[30:]
   teamMembers = teamResData.get('members')
 
-  field = {}
+  memberList = ''
+
   for i in range(0, len(teamMembers)):
     member = teamMembers[i]
-    url = member.get('faceit_url')[0:23] + "en/" + member.get('faceit_url')[30:]
-    field.update({
-      member.get('nickname') : url
-    })
+    memberList += member.get('faceit_url')[0:23] + "en/" + member.get('faceit_url')[30:]
+    memberList += '\n\n'
 
   embed = discord.Embed(color=0XFF00FF)
-  for name, value in field.items():
-    embed.add_field(name=name, value=value, inline=True)
+  embed.add_field(name='List of all players in ' + teamName, value=memberList, inline=True)
 
   embed.set_author(name=teamName,
                    icon_url=teamAvatar, url=teamUrl)
