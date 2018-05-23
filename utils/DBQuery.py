@@ -6,14 +6,14 @@ db = Database()
 class DBQuery:
   @staticmethod
   async def getPlayer(nickname):
-    seq =(nickname)
+    seq = (nickname)
     cmd = "SELECT * FROM Player WHERE nickname = '%s';"
-    return await db.get(cmd, seq)
+    return await db.get(cmd, nickname)
 
   @staticmethod
   async def insertPlayer(nickname, player_id, kills, deaths):
     seq = (nickname, player_id, kills, deaths)
-    cmd = "INSERT INTO Player (`nickname`, `player_id`, `kills`, `deaths`) VALUES (%s, %s, %s, %s);"
+    cmd = "INSERT INTO Player (`nickname`, `player_id`, `kills`, `deaths`) VALUES ('%s', '%s', %s, %s);"
     await db.execute(cmd, seq)
 
   @staticmethod

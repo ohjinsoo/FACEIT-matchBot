@@ -24,21 +24,23 @@ async def addMatchToDatabase(match, members):
 
   matchInfoResData = await matchInfoRes.json()
 
-  teams = matchInfoResData.get('rounds')[1].get('teams')
+
+  teams = matchInfoResData.get('rounds')[0].get('teams')
 
   # if factionOne, team[0].
   # else,          team[1].
-  players = teams[int(not match.isFactionOne)]
-
+  players = teams[int(not match.isFactionOne)].get('players')
   for i in range(0, len(players)):
     player = players[i]
     playerName = player.get('nickname')
     isATrackedPlayer = False
+    
     for j in range(0, len(members)):
       if playerName == members[j].get('nickname'):
         isATrackedPlayer = True
 
     if isATrackedPlayer:
+
       # Isn't actually a 'boolean' but rather count. But because the DB should only contain 0 or 1 copy
       # of a player, it acts as a boolean.
       existsInDB = await DBQuery.getPlayer(playerName)
@@ -46,9 +48,9 @@ async def addMatchToDatabase(match, members):
       deaths = player.get('player_stats').get('Deaths')
 
       if existsInDB:
-        player_id = player.get('player_id')
-        insertPlayer(playerName, player_id, kills, deaths):
+        await DBQuery.addToPlayer(playerName, kills, deaths)
 
       else:
-        addToPlayer(playerName, kills, deaths)
+        player_id = player.get('player_id')
+        await DBQuery.insertPlayer(playerName, player_id, kills, deaths)
 

@@ -10,6 +10,10 @@ from config import CHANNEL_ID
 from models.Match import Match
 from utils.Api import Api
 
+addToDatabase = []
+
+# Parses through the list and adds a new line in between each one.
+
 async def parsePlayerList(playerList):
   ret = ''
 
@@ -100,12 +104,26 @@ async def printMatches(playersInGame, gameIds, client):
 
     matchResData = await matchRes.json()
     serverAndMap = matchResData.get('voting')
+    server = ''
+    mapName = ''
+    if type(serverAndMap) is list:
+      serverAndMap[0].get('map').get('name')
+      serverAndMap[0].get('map').get('name')
+      
+    else:
+      server = serverAndMap.get('location').get('pick')[0]
+      mapName = serverAndMap.get('map').get('pick')[0]
 
     factionOne = matchResData.get('teams').get('faction1')
     factionTwo = matchResData.get('teams').get('faction2')
 
     factionOneList = factionOne.get('roster_v1')
     factionTwoList = factionTwo.get('roster_v1')
+
+    if factionOneList == None:
+      factionOneList = factionOne.get('roster')
+      factionTwoList = factionTwo.get('roster')
+
 
     factionOneMembers = []
     factionTwoMembers = []
@@ -128,8 +146,9 @@ async def printMatches(playersInGame, gameIds, client):
       'matchId' : matchResData.get('match_id'),
       'matchUrl' : matchResData.get('faceit_url')[0:23] + "en/" + matchResData.get('faceit_url')[30:],
 
-      'server': serverAndMap[0].get('location').get('name'),
-      'mapName' : serverAndMap[0].get('map').get('name'),
+      'server': server,
+      'mapName' : mapName,
+
       'start' : matchResData.get('started_at'),
       'end' : matchResData.get('finished_at'),
 
@@ -139,13 +158,14 @@ async def printMatches(playersInGame, gameIds, client):
       'factionTwoName' : factionTwo.get('name'),
 
       'factionOne' : factionOneMembers,
-      'factionTwo' : factionTwoMembers
+      'factionTwo' : factionTwoMembers,
       'isFactionOne' : isFactionOne
     }
 
     match = Match()
     match.__dict__.update(matchData)
 
+    global addToDatabase
     addToDatabase.append(match)
     embed = await createMatchEmbed(match, currPlayers)
 
@@ -159,8 +179,9 @@ async def printMatches(playersInGame, gameIds, client):
     else:
       outcome += ' lost their match :('
 
-    message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome)
-    await client.edit_message(message=message, embed=embed)
+    # UN COMMENT THIS WHEN YOU ARE DONE JINSOO!
+    # message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome)
+    # await client.edit_message(message=message, embed=embed)
 
 
 
@@ -197,26 +218,25 @@ async def startMatchSearch(client):
   teamRes = await Api.getTeamMembers()
   teamResData = await teamRes.json()
   members = teamResData.get('members')
-  rightBound = int(time.time())
+
+  # Initialize the bounds for when to start searching for matches.
+  rightBound = int(time.time()) - 216000
   await matchSearch(client, members, rightBound)
 
 
 async def matchSearch(client, members, rightBound):
   await searchForAllMatches(members, client, rightBound)
-  await asyncio.sleep(60)
+  await asyncio.sleep(3)
 
   # Update the rightBound of match searches.
   rightBound = int(time.time())
-
+  global addToDatabase
   if len(addToDatabase) != 0:
     for i in range(0, len(addToDatabase)):
-      await matchStats.addMatchToDatabase(addToDatabase[i], members)
+      await addMatchToDatabase(addToDatabase[i], members)
+
+    addToDatabase = []
+
 
   await matchSearch(client, members, rightBound)
-  
-
-
-
-
-addToDatabase = []
 
