@@ -24,12 +24,12 @@ async def addMatchToDatabase(match, members):
 
   matchInfoResData = await matchInfoRes.json()
 
-
-  teams = matchInfoResData.get('rounds')[0].get('teams')
-
   # if factionOne, team[0].
   # else,          team[1].
-  players = teams[int(not match.isFactionOne)].get('players')
+  teams = matchInfoResData.get('rounds')[0].get('teams')[int(not match.isFactionOne)]
+  teamWin = teams.get('team_stats').get('Team Win')
+
+  players = teams.get('players')
   for i in range(0, len(players)):
     player = players[i]
     playerName = player.get('nickname')
@@ -48,9 +48,9 @@ async def addMatchToDatabase(match, members):
       deaths = player.get('player_stats').get('Deaths')
 
       if existsInDB:
-        await DBQuery.addToPlayer(playerName, kills, deaths)
+        await DBQuery.addToPlayer(playerName, kills, deaths, teamWin, 1)
 
       else:
         player_id = player.get('player_id')
-        await DBQuery.insertPlayer(playerName, player_id, kills, deaths)
+        await DBQuery.insertPlayer(playerName, player_id, kills, deaths, teamWin, 1)
 

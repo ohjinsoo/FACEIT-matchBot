@@ -107,8 +107,8 @@ async def printMatches(playersInGame, gameIds, client):
     server = ''
     mapName = ''
     if type(serverAndMap) is list:
-      serverAndMap[0].get('map').get('name')
-      serverAndMap[0].get('map').get('name')
+      server = serverAndMap[0].get('location').get('name')
+      mapName = serverAndMap[0].get('map').get('name')
       
     else:
       server = serverAndMap.get('location').get('pick')[0]
@@ -124,6 +124,8 @@ async def printMatches(playersInGame, gameIds, client):
       factionOneList = factionOne.get('roster')
       factionTwoList = factionTwo.get('roster')
 
+    print(server)
+    print(mapName)
 
     factionOneMembers = []
     factionTwoMembers = []
@@ -174,14 +176,13 @@ async def printMatches(playersInGame, gameIds, client):
       outcome += ', **' + currPlayers[i] + '**'
 
     # if embed == green, add ' won!' , else add ' lost :('
-    if embed.color == 0x00ff00:
+    if (match.winner == 'faction1' and match.isFactionOne) or (match.winner == 'faction2' and not match.isFactionOne):
       outcome += ' won their match!'
     else:
       outcome += ' lost their match :('
 
-    # UN COMMENT THIS WHEN YOU ARE DONE JINSOO!
-    # message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome)
-    # await client.edit_message(message=message, embed=embed)
+    message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome)
+    await client.edit_message(message=message, embed=embed)
 
 
 
@@ -220,13 +221,13 @@ async def startMatchSearch(client):
   members = teamResData.get('members')
 
   # Initialize the bounds for when to start searching for matches.
-  rightBound = int(time.time()) - 216000
+  rightBound = int(time.time()) - 8000
   await matchSearch(client, members, rightBound)
 
 
 async def matchSearch(client, members, rightBound):
   await searchForAllMatches(members, client, rightBound)
-  await asyncio.sleep(3)
+  await asyncio.sleep(60)
 
   # Update the rightBound of match searches.
   rightBound = int(time.time())
