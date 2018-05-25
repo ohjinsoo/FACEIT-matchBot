@@ -11,7 +11,7 @@ from models.Match import Match
 from utils.Api import Api
 
 addToDatabase = []
-
+FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg'
 # Parses through the list and adds a new line in between each one.
 
 async def parsePlayerList(playerList):
@@ -64,7 +64,7 @@ async def createMatchEmbed(match, currPlayers):
   embed = discord.Embed(color=color, description='------------------------------------------------------------------------------')
   embed.set_author(name=title,
     # not sure what kind of icon i should put, so i put faceit icon from steam as a placeholder
-                   icon_url='https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg',url=match.matchUrl)
+                   icon_url=FACEIT_STEAM_ICON,url=match.matchUrl)
 
   for name, value in matchFields.items():
     embed.add_field(name=name, value=value, inline=True)
@@ -221,7 +221,7 @@ async def startMatchSearch(client):
   members = teamResData.get('members')
 
   # Initialize the bounds for when to start searching for matches.
-  rightBound = int(time.time()) - 8000
+  rightBound = int(time.time())
   await matchSearch(client, members, rightBound)
 
 

@@ -7,6 +7,6 @@ wins INT UNSIGNED NOT NULL,
 matches INT UNSIGNED NOT NULL
 );
 
-UPDATE table1 SET col_a='k1', col_b='foo' WHERE key_col='1';
+UPDATE players SET col_a='k1', col_b='foo' WHERE key_col='1';
 
 TRUNCATE TABLE players; # this deletes all table data, for jinsoo

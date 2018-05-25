@@ -1,5 +1,4 @@
 import asyncio
-from config import DB_TABLE_NAME
 from utils.Database import Database
 
 
@@ -7,25 +6,30 @@ db = Database()
 
 class DBQuery:
   @staticmethod
-  async def getPlayer(nickname):
-    seq = (nickname)
-    cmd = "SELECT * FROM " + DB_TABLE_NAME + " WHERE nickname = '%s';"
-    return await db.get(cmd, nickname)
+  async def getPlayer(faceit_id):
+    seq = (faceit_id)
+    cmd = "SELECT * FROM players WHERE faceit_id = '%s';"
+    return await db.contains(cmd, seq)
 
   @staticmethod
-  async def insertPlayer(nickname, player_id, kills, deaths, wins, matches):
-    seq = (nickname, kills, deaths, wins, matches)
-    cmd = "INSERT INTO " + DB_TABLE_NAME + " (`nickname`, `kills`, `deaths`, `wins`, `matches`) VALUES ('%s', %s, %s, %s, %s);"
+  async def insertPlayer(faceit_id, nickname, kills, deaths, wins, matches):
+    seq = (faceit_id, nickname, kills, deaths, wins, matches)
+    cmd = "INSERT INTO players (`faceit_id`, `nickname`, `kills`, `deaths`, `wins`, `matches`) VALUES ('%s', '%s', %s, %s, %s, %s);"
     await db.execute(cmd, seq)
 
   @staticmethod
-  async def addToPlayer(nickname, kills, deaths, wins, matches):
-    seq = (kills, deaths, wins, matches, nickname)
-    cmd = "UPDATE " + DB_TABLE_NAME + " SET kills  = kills + %s, deaths = deaths + %s, wins = wins + %s, matches = matches + %s WHERE nickname = '%s';"
+  async def addToPlayer(faceit_id, kills, deaths, wins, matches):
+    seq = (kills, deaths, wins, matches, faceit_id)
+    cmd = "UPDATE players SET kills  = kills + %s, deaths = deaths + %s, wins = wins + %s, matches = matches + %s WHERE faceit_id = '%s';"
     await db.execute(cmd, seq)
 
   @staticmethod
-  async def removePlayer(nickname):
-    seq = (nickname)
-    cmd = "DELETE FROM " + DB_TABLE_NAME + " WHERE nickname = '%s';"
+  async def removePlayer(faceit_id):
+    seq = (faceit_id)
+    cmd = "DELETE FROM players WHERE faceit_id = '%s';"
     await db.execute(cmd, seq)
+
+  @staticmethod
+  async def killsRanking():
+    cmd = "SELECT nickname, kills FROM players ORDER BY kills DESC;"
+    return await db.get(cmd)

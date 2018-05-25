@@ -7,24 +7,31 @@ class Database:
   db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PW, db=DB_NAME)
   cur = db.cursor()
 
-  async def get(self, command, nick):
-    log = command % nick
-    print('get: %s' % log)
+  async def contains(self, command, seq):
+    log = command % seq
+    print('contains: %s' % log)
 
     #  BROKEN. (nick), (nick,), nor [nick] will work :( :( :(
-    body = self.cur.execute(command, (nick, ))
+    amount = self.cur.execute(log)
     self.db.commit()
 
-    return body
+    return amount
 
   async def execute(self, command, seq):
     log = command % seq
     print('execute: %s' % log)
 
     # This is starting to break as well :eyes:
-    self.cur.execute(command, (seq, ))
+    self.cur.execute(log)
     self.db.commit()
 
   def __del__(self):
     self.db.close()
 
+  async def get(self, command):
+    print('get: %s' % command)
+
+    self.cur.execute(command)
+    self.db.commit()
+
+    return self.cur.fetchall()

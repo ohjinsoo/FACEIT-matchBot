@@ -1,15 +1,13 @@
 from config import BOT_TOKEN
 
 import discord
-import aiohttp
 import asyncio
 import websockets
-import json
 
-from match import matchInfo
-from models.Player import Player
+from match.matchInfo import startMatchSearch
 from commands.playerStats import stats
 from commands.showTrackedPlayers import showPlayers
+from commands.rankByKills import rankByKills
 from utils.DBQuery import DBQuery
 
 
@@ -20,7 +18,7 @@ async def on_ready():
     print('Logged in as: %s [%s]' % (client.user.name, client.user.id))
 
     # Start 60s timer to look for FACEIT matches.
-    await matchInfo.startMatchSearch(client)
+    await startMatchSearch(client)
 
 @client.event
 async def on_message(message):
@@ -29,5 +27,8 @@ async def on_message(message):
 
     elif message.content.startswith('.players'):
         await showPlayers(client, message)
+
+    elif message.content == '.ranks kills':
+        await rankByKills(client, message)
 
 client.run(BOT_TOKEN)
