@@ -8,6 +8,7 @@ from match.matchInfo import startMatchSearch
 from commands.playerStats import stats
 from commands.showTrackedPlayers import showPlayers
 from commands.rankByKills import rankByKills
+from commands.rankByKDR import rankByKDR
 from utils.DBQuery import DBQuery
 
 
@@ -30,5 +31,8 @@ async def on_message(message):
 
     elif message.content == '.ranks kills':
         await rankByKills(client, message)
+
+    elif message.content == '.ranks kdr':
+        await rankByKDR(client, message)
 
 client.run(BOT_TOKEN)

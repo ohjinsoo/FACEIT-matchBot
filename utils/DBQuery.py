@@ -30,6 +30,12 @@ class DBQuery:
     await db.execute(cmd, seq)
 
   @staticmethod
-  async def killsRanking():
-    cmd = "SELECT nickname, kills FROM players ORDER BY kills DESC;"
-    return await db.get(cmd)
+  async def getRanking(listOfCol, typeOfRanking):
+    stringOfCol = listOfCol[0]
+
+    for i in range(1, len(listOfCol)):
+      stringOfCol += ', ' + listOfCol[i]
+      
+    seq = (stringOfCol, typeOfRanking)
+    cmd = "SELECT %s FROM players ORDER BY %s DESC;"
+    return await db.get(cmd, seq)

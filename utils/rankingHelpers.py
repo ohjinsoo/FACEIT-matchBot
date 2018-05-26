@@ -15,6 +15,14 @@ async def createRankEmbed(nicknameString, valuesString, typeOfValue):
 
   return embed
 
+async def parseFloatList(list):
+  ret = ''
+
+  for i in range(0, len(list)):
+    ret += "{0:.2f}".format(list[i]) + '\n'
+
+  return str(ret)
+
 async def parseList(list):
   ret = ''
 

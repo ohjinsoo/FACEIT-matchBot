@@ -9,7 +9,8 @@ from utils import rankingHelpers
 # KILS: { amount of kills each player has }
 
 async def rankByKills(client, message):
-  ranking = await DBQuery.killsRanking()
+  columnsNeeded = ['nickname', 'kills']
+  ranking = await DBQuery.getRanking(columnsNeeded, "kills")
   nicknameList = []
   killsList = []
   for i in range(0, len(ranking)):
