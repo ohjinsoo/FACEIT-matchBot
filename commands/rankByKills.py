@@ -1,7 +1,6 @@
 import discord
 import asyncio
 from utils.DBQuery import DBQuery
-from utils.DBQuery import DBQuery
 from utils import rankingHelpers
 
 # Sends a message that displays an embed with two fields:
@@ -9,8 +8,7 @@ from utils import rankingHelpers
 # KILS: { amount of kills each player has }
 
 async def rankByKills(client, message):
-  columnsNeeded = ['nickname', 'kills']
-  ranking = await DBQuery.getRanking(columnsNeeded, "kills")
+  ranking = await DBQuery.getRanking(['nickname', 'kills'], 'kills')
   nicknameList = []
   killsList = []
   for i in range(0, len(ranking)):

@@ -6,7 +6,7 @@ FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/image
 async def createRankEmbed(nicknameString, valuesString, typeOfValue):
   listField = {
     'NAMES' :  nicknameString,
-    '# OF ' + typeOfValue : valuesString
+    typeOfValue : valuesString
   }
   embed = discord.Embed(color=0xFFFFFF)
   embed.set_author(name= typeOfValue +" Leaderboard", icon_url=FACEIT_STEAM_ICON)
@@ -14,6 +14,27 @@ async def createRankEmbed(nicknameString, valuesString, typeOfValue):
     embed.add_field(name=name, value=value, inline=True)
 
   return embed
+
+async def createEmbed(nicknameString, valuesList, typesList):
+  listField = {
+    'NAMES' :  nicknameString,
+  }
+
+  for i in range(0, len(valuesList)):
+    listField.update({
+      typesList[i] : valuesList[i]
+    })
+    
+
+  embed = discord.Embed(color=0xFFFFFF)
+  embed.set_author(name="Leaderboard", icon_url=FACEIT_STEAM_ICON)
+  for name, value in listField.items():
+    embed.add_field(name=name, value=value, inline=True)
+
+  return embed
+
+# Separate function for float lists
+# so floats will only have a sigfig of two.
 
 async def parseFloatList(list):
   ret = ''

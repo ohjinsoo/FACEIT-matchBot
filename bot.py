@@ -9,6 +9,7 @@ from commands.playerStats import stats
 from commands.showTrackedPlayers import showPlayers
 from commands.rankByKills import rankByKills
 from commands.rankByKDR import rankByKDR
+from commands.showStats import showStats
 from utils.DBQuery import DBQuery
 
 
@@ -23,10 +24,18 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.content.startswith('.stats '):
+    if message.content == '.commands':
+        commands = '``` List of Commands: '
+        commands += '\n    .stats [player]'
+        commands += '\n    .players'
+        commands += '\n    .players [stats]'
+        commands += '\n    .ranks [kills/kdr]```'
+        await client.send_message(message.channel, commands)
+
+    elif message.content.startswith('.stats '):
         await stats(client, message)
 
-    elif message.content.startswith('.players'):
+    elif message.content == '.players':
         await showPlayers(client, message)
 
     elif message.content == '.ranks kills':
@@ -34,5 +43,8 @@ async def on_message(message):
 
     elif message.content == '.ranks kdr':
         await rankByKDR(client, message)
+
+    elif message.content == '.players stats':
+        await showStats(client, message)
 
 client.run(BOT_TOKEN)
