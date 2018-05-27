@@ -7,20 +7,17 @@ async def playerRanking(client, message):
   print("playerRanking\n")
   data = {}
 
-  if message.content == '.rank':
-    data = await showPlayersStats()
+  command = message.content[6:]
+  if command == 'kills':
+    data = await orderByKills()
+  elif command == 'kdr':
+    data = await orderByKDR()
+  elif command == 'wins':
+    data = await orderByWins()
+  elif command == 'wr':
+    data = await orderByWR()
   else:
-    command = message.content[6:]
-    if command == 'kills':
-      data = await orderByKills()
-    elif command == 'kdr':
-      data = await orderByKDR()
-    elif command == 'wins':
-      data = await orderByWins()
-    elif command == 'wr':
-      data = await orderByWR()
-    else:
-      data = await showPlayersStats()
+    data = await showPlayersStats()
 
   await embed(client, message, data)
 
