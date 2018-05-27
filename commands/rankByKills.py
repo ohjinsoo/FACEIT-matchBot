@@ -9,6 +9,11 @@ from utils import rankingHelpers
 
 async def rankByKills(client, message):
   ranking = await DBQuery.getRanking(['nickname', 'kills'], 'kills')
+
+  if ranking == ():
+    await client.send_message(message.channel, 'There are no players in the Database.')
+    return
+
   nicknameList = []
   killsList = []
   for i in range(0, len(ranking)):

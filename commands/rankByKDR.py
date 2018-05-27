@@ -11,6 +11,10 @@ from utils import rankingHelpers
 async def rankByKDR(client, message):
   columnsNeeded = ['nickname', 'kills', 'deaths']
   ranking = await DBQuery.getRanking(columnsNeeded, "kills")
+
+  if ranking == ():
+    await client.send_message(message.channel, 'There are no players in the Database.')
+    return
   
   nicknameList = []
   kdrList = []

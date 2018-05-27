@@ -11,7 +11,11 @@ from utils import rankingHelpers
 async def rankByWR(client, message):
   columnsNeeded = ['nickname', 'wins', 'matches']
   ranking = await DBQuery.getRanking(columnsNeeded, "wins")
-  print(ranking)
+
+  if ranking == ():
+    await client.send_message(message.channel, 'There are no players in the Database.')
+    return
+    
   nicknameList = []
   winrateList = []
   for i in range(0, len(ranking)):
