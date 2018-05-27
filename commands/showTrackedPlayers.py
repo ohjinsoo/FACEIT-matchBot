@@ -18,7 +18,7 @@ async def showPlayers(client, message):
   for i in range(0, len(teamMembers)):
     member = teamMembers[i]
     memberList += member.get('faceit_url')[0:23] + "en/" + member.get('faceit_url')[30:]
-    memberList += '\n\n'
+    memberList += '\n'
 
   embed = discord.Embed(color=0XFF00FF)
   embed.add_field(name='List of all players in ' + teamName, value=memberList, inline=True)

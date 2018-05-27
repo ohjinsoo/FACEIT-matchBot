@@ -9,6 +9,7 @@ from match.matchStats import addMatchToDatabase
 from config import CHANNEL_ID
 from models.Match import Match
 from utils.Api import Api
+from utils.DBQuery import DBQuery
 
 addToDatabase = []
 FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg'
@@ -39,7 +40,7 @@ async def createMatchEmbed(match, currPlayers):
   # color = red
   color = 0xff0000
 
-  # If winner, make embed green. 
+  # If winner, make embed green.
   if (match.isFactionOne and match.winner == 'faction1') or (not match.isFactionOne and match.winner == 'faction2'):
     color = 0x00ff00
 
@@ -110,7 +111,7 @@ async def printMatches(playersInGame, gameIds, client):
     if type(serverAndMap) is list:
       server = serverAndMap[0].get('location').get('name')
       mapName = serverAndMap[0].get('map').get('name')
-      
+
     else:
       server = serverAndMap.get('location').get('pick')[0]
       mapName = serverAndMap.get('map').get('pick')[0]
@@ -195,8 +196,6 @@ async def searchForAllMatches(players, client, rightBound):
   playersInGame = []
   gameIds = []
 
-  print('players', players)
-
   if players is None:
     return
 
@@ -220,6 +219,12 @@ async def startMatchSearch(client):
   teamRes = await Api.getTeamMembers()
   teamResData = await teamRes.json()
   members = teamResData.get('members')
+
+  print('startMatchSearch', members)
+
+  for i in range(0, len(members)):
+    member = members[i]
+    DBQuery.insertOrUpdate(member.get('user_id'), member.get('nickname'))
 
   # Initialize the bounds for when to start searching for matches.
   rightBound = int(time.time())
