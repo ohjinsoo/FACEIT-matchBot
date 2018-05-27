@@ -8,7 +8,11 @@ from utils import rankingHelpers
 
 async def showStats(client, message):
   columnsNeeded = ['nickname', 'kills', 'deaths', 'wins', 'matches']
-  ranking = await DBQuery.getRanking(columnsNeeded, "nickname")
+  statsOnDatabase = await DBQuery.getRanking(columnsNeeded, "nickname")
+
+  if statsOnDatabase == ():
+    await client.send_message(message.channel, 'There are no players in the Database.')
+    return
 
   nicknameList = []
   killsList = []
