@@ -68,7 +68,12 @@ class DBQuery:
     db.execute(cmd, seq)
 
   @staticmethod
-  def getRanking(column = 'kills'):
-    seq = {'column': column}
-    cmd = "SELECT nickname, kills, deaths, wins, matches FROM players ORDER BY %(column)s DESC;"
+  def getRanking(column = 'kills', order = 'DESC'):
+    seq = {}
+    cmd = """
+      SELECT
+        nickname, kills, deaths, wins, matches
+      FROM players
+      ORDER BY %(column)s %(order)s;
+    """ % {'column': column, 'order': order}
     return db.get(cmd, seq)
