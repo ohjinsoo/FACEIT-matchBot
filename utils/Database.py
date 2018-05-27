@@ -26,7 +26,8 @@ class Database:
     self.db.commit()
 
   def __del__(self):
-    self.db.close()
+    self.db.shutdown()
+    self.cur.close()
 
   async def get(self, command, seq):
     log = command % seq

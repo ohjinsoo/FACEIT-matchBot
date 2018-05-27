@@ -9,6 +9,8 @@ from commands.playerStats import stats
 from commands.showTrackedPlayers import showPlayers
 from commands.rankByKills import rankByKills
 from commands.rankByKDR import rankByKDR
+from commands.rankByWins import rankByWins
+from commands.rankByWR import rankByWR
 from commands.showStats import showStats
 from utils.DBQuery import DBQuery
 
@@ -29,7 +31,7 @@ async def on_message(message):
         commands += '\n    .stats [player]'
         commands += '\n    .players'
         commands += '\n    .players [stats]'
-        commands += '\n    .ranks [kills/kdr]```'
+        commands += '\n    .ranks [kills/kdr/wins/winrate]```'
         await client.send_message(message.channel, commands)
 
     elif message.content.startswith('.stats '):
@@ -43,6 +45,12 @@ async def on_message(message):
 
     elif message.content == '.ranks kdr':
         await rankByKDR(client, message)
+
+    elif message.content == '.ranks wins':
+        await rankByWins(client, message)
+
+    elif message.content == '.ranks winrate':
+        await rankByWR(client, message)
 
     elif message.content == '.players stats':
         await showStats(client, message)

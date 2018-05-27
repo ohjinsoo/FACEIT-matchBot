@@ -11,9 +11,21 @@ from utils import rankingHelpers
 async def rankByKDR(client, message):
   columnsNeeded = ['nickname', 'kills', 'deaths']
   ranking = await DBQuery.getRanking(columnsNeeded, "kills")
+  
   nicknameList = []
   kdrList = []
   for i in range(0, len(ranking)):
+
+    # sorting alg (sorts by kdr, adds to nicknamelist as well):
+    #   if kdrdList is empty:
+    #     append it
+    #
+    #   search through every value in kdrList.
+    #   if kdr > listvalue:
+    #     insert in front of the listvalue
+    #   else, if kdr is smaller than every single value in the list:
+    #     append it
+
     row = ranking[i]
     kdr = float(row[1] / row[2])
     if len(kdrList) == 0:
@@ -21,20 +33,15 @@ async def rankByKDR(client, message):
       nicknameList.append(row[0])
 
     else:
-      # sorting alg (sorts by kdr, adds to nicknamelist as well):
-      #   search through every value in kdrList.
-      #   if kdr > listvalue:
-      #     insert in front of the listvalue
-      #   else, if kdr is smaller than every single value in the list:
-      #     append it
-
       for j in range(0, len(kdrList)):
-        if kdr > kdrList[j]:
+        if kdr >= kdrList[j]:
           kdrList.insert(j, kdr)
           nicknameList.insert(j, row[0])
+          break
         elif kdrList[j] > kdr and j == len(kdrList) - 1:
           kdrList.append(kdr)
           nicknameList.append(row[0])
+          break
 
   nicknameString = await rankingHelpers.parseList(nicknameList)
   kdrString = await rankingHelpers.parseFloatList(kdrList)

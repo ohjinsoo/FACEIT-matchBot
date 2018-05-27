@@ -12,6 +12,7 @@ from utils.Api import Api
 
 addToDatabase = []
 FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg'
+
 # Parses through the list and adds a new line in between each one.
 
 async def parsePlayerList(playerList):
