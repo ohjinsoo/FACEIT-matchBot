@@ -3,21 +3,14 @@ import asyncio
 from utils.DBQuery import DBQuery
 from utils import rankingHelpers
 
-# Sends a message that displays an embed with two fields:
-# NAMES: { list of all the names }
-# KILS: { amount of kills each player has }
-
 async def rankByKills(client, message):
-  ranking = await DBQuery.getRanking(['nickname', 'kills'], 'kills')
-  nicknameList = []
-  killsList = []
-  for i in range(0, len(ranking)):
-    row = ranking[i]
-    nicknameList.append(row[0])
-    killsList.append(row[1])
+  rankings = DBQuery.getRanking()
+  stats = []
 
-  nicknameString = await rankingHelpers.parseList(nicknameList)
-  killsString = await rankingHelpers.parseList(killsList)
+  for i in range(0, len(rankings)):
+    player = rankings[i]
+    kills = int(player.get('kills') or 0)
+    stats.append([player.get('nickname'), kills])
 
-  embed = await rankingHelpers.createRankEmbed(nicknameString, killsString, 'KILLS')
+  embed = await rankingHelpers.createRankEmbed(stats, 'Ranking by kills', 'Kills')
   await client.send_message(message.channel, embed=embed)

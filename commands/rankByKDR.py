@@ -4,47 +4,19 @@ from utils.DBQuery import DBQuery
 from utils.DBQuery import DBQuery
 from utils import rankingHelpers
 
-# Sends a message that displays an embed with two fields:
-# NAMES: { list of all the names }
-# KDR: { player's kills:death ratio }
-
 async def rankByKDR(client, message):
-  columnsNeeded = ['nickname', 'kills', 'deaths']
-  ranking = await DBQuery.getRanking(columnsNeeded, "kills")
-  
-  nicknameList = []
-  kdrList = []
-  for i in range(0, len(ranking)):
+  rankings = DBQuery.getRanking('kills/deaths')
+  stats = []
 
-    # sorting alg (sorts by kdr, adds to nicknamelist as well):
-    #   if kdrdList is empty:
-    #     append it
-    #
-    #   search through every value in kdrList.
-    #   if kdr > listvalue:
-    #     insert in front of the listvalue
-    #   else, if kdr is smaller than every single value in the list:
-    #     append it
+  for i in range(0, len(rankings)):
+    player = rankings[i]
+    kills = int(player.get('kills') or 0)
+    deaths = int(player.get('deaths') or 0)
 
-    row = ranking[i]
-    kdr = float(row[1] / row[2])
-    if len(kdrList) == 0:
-      kdrList.append(kdr)
-      nicknameList.append(row[0])
+    stats.append([
+      player.get('nickname'),
+      '∞' if deaths == 0 else (kills / deaths)
+    ])
 
-    else:
-      for j in range(0, len(kdrList)):
-        if kdr >= kdrList[j]:
-          kdrList.insert(j, kdr)
-          nicknameList.insert(j, row[0])
-          break
-        elif kdrList[j] > kdr and j == len(kdrList) - 1:
-          kdrList.append(kdr)
-          nicknameList.append(row[0])
-          break
-
-  nicknameString = await rankingHelpers.parseList(nicknameList)
-  kdrString = await rankingHelpers.parseFloatList(kdrList)
-
-  embed = await rankingHelpers.createRankEmbed(nicknameString, kdrString, 'KDR')
+  embed = await rankingHelpers.createRankEmbed(stats, 'Ranking by KDR', 'KDR')
   await client.send_message(message.channel, embed=embed)

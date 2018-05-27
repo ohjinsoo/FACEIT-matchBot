@@ -4,47 +4,19 @@ from utils.DBQuery import DBQuery
 from utils.DBQuery import DBQuery
 from utils import rankingHelpers
 
-# Sends a message that displays an embed with two fields:
-# NAMES: { list of all the names }
-# KDR: { player's kills:death ratio }
-
 async def rankByWR(client, message):
-  columnsNeeded = ['nickname', 'wins', 'matches']
-  ranking = await DBQuery.getRanking(columnsNeeded, "wins")
-  print(ranking)
-  nicknameList = []
-  winrateList = []
-  for i in range(0, len(ranking)):
+  rankings = DBQuery.getRanking('wins/matches')
+  stats = []
 
-    # sorting alg (sorts by winrate, adds to nicknamelist as well):
-    #   if winrateList is empty:
-    #     append it
-    #
-    #   search through every value in winrateList.
-    #     if wr > listvalue:
-    #       insert in front of the listvalue
-    #     else, if wr is smaller than every single value in the list:
-    #       append it
+  for i in range(0, len(rankings)):
+    player = rankings[i]
+    wins = int(player.get('wins') or 0)
+    matches = int(player.get('matches') or 0)
 
-    row = ranking[i]
-    wr = float(row[1] / row[2])
-    if len(winrateList) == 0:
-      winrateList.append(wr)
-      nicknameList.append(row[0])
+    stats.append([
+        player.get('nickname'),
+        '∞' if matches == 0 else (wins / matches)
+    ])
 
-    else:
-      for j in range(0, len(winrateList)):
-        if wr >= winrateList[j]:
-          winrateList.insert(j, wr)
-          nicknameList.insert(j, row[0])
-          break
-        elif winrateList[j] > wr and j == len(winrateList) - 1:
-          winrateList.append(wr)
-          nicknameList.append(row[0])
-          break
-
-  nicknameString = await rankingHelpers.parseList(nicknameList)
-  winrateString = await rankingHelpers.parseFloatList(winrateList)
-
-  embed = await rankingHelpers.createRankEmbed(nicknameString, winrateString, 'WINRATE')
+  embed = await rankingHelpers.createRankEmbed(stats, 'Ranking by winrate', 'Winrate')
   await client.send_message(message.channel, embed=embed)
