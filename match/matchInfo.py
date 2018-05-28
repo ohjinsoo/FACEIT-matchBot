@@ -6,7 +6,7 @@ import json
 import threading
 import MySQLdb
 from match.matchStats import addMatchToDatabase
-from config import CHANNEL_ID
+from config import CHANNEL_ID_1, CHANNEL_ID_2
 from models.Match import Match
 from utils.Api import Api
 from utils.DBQuery import DBQuery
@@ -183,8 +183,12 @@ async def printMatches(playersInGame, gameIds, client):
     else:
       outcome += ' lost their match :('
 
-    message = await client.send_message(discord.Object(id=CHANNEL_ID), outcome)
+    message = await client.send_message(discord.Object(id=CHANNEL_ID_1), outcome)
     await client.edit_message(message=message, embed=embed)
+
+    if CHANNEL_ID_2 != 'null':
+      message = await client.send_message(discord.Object(id=CHANNEL_ID_2), outcome)
+      await client.edit_message(message=message, embed=embed)
 
 
 
@@ -227,7 +231,7 @@ async def startMatchSearch(client):
     DBQuery.insertOrUpdate(member.get('user_id'), member.get('nickname'))
 
   # Initialize the bounds for when to start searching for matches.
-  rightBound = int(time.time())
+  rightBound = int(time.time()) - 21600
   await matchSearch(client, members, rightBound)
 
 

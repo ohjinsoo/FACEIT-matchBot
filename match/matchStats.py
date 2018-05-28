@@ -5,7 +5,6 @@ import time
 import json
 import threading
 import MySQLdb
-from config import CHANNEL_ID
 from models.Match import Match
 from utils.Api import Api
 from utils.DBQuery import DBQuery
