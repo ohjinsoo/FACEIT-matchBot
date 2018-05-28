@@ -231,7 +231,7 @@ async def startMatchSearch(client):
     DBQuery.insertOrUpdate(member.get('user_id'), member.get('nickname'))
 
   # Initialize the bounds for when to start searching for matches.
-  rightBound = int(time.time()) - 21600
+  rightBound = int(time.time())
   await matchSearch(client, members, rightBound)
 
 
