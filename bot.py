@@ -9,13 +9,13 @@ from commands.playerStats import stats
 from commands.showTrackedPlayers import showPlayers
 from commands.playerRanking import playerRanking
 from utils.DBQuery import DBQuery
-
+from utils.Logger import log
 
 client = discord.Client()
 
 @client.event
 async def on_ready():
-    print('Logged in as: %s [%s]' % (client.user.name, client.user.id))
+    log('Logged in as: %s [%s]' % (client.user.name, client.user.id))
 
     # Start 60s timer to look for FACEIT matches.
     await startMatchSearch(client)

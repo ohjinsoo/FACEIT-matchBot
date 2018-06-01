@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
 import MySQLdb
-import time
+from utils.Logger import log
 
 from config import DB_HOST, DB_USER, DB_PW, DB_NAME
 
@@ -10,37 +10,32 @@ class Database:
   cur = db.cursor()
 
   def __del__(self):
-    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
-    print(currentTime + "::: Closing MySQL connection...")
+    log("::: Closing MySQL connection...")
 
     self.cur.close()
     self.db.close()
 
   def query(self, sql, var):
     run = self.cur.execute(sql, var)
-    print('LAST EXEC: ' + str(self.cur._last_executed))
     self.db.commit()
 
     return run
 
   def contains(self, command, seq):
-    log = command % seq
-    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
-    print(currentTime + '::: contains: ' + log)
+    logString = command % seq
+    log('contains: ' + logString)
 
     return self.query(command, seq)
 
   def execute(self, command, seq):
-    log = command % seq
-    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
-    print(currentTime + '::: execute: ' + log)
+    logString = command % seq
+    log('execute: ' + logString)
 
     self.query(command, seq)
 
   def get(self, command, seq):
-    log = command % seq
-    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
-    print(currentTime + '::: get: ' + log)
+    logString = command % seq
+    log('get: ' + logString)
 
     self.query(command, seq)
     return [

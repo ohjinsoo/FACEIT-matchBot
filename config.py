@@ -13,3 +13,5 @@ CHANNEL_ID_1 = os.getenv('CHANNEL_ID_1')
 CHANNEL_ID_2 = os.getenv('CHANNEL_ID_2')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
+SLEEP_LENGTH = float(os.getenv('SLEEP_LENGTH'))
+ENV = os.getenv('ENV')

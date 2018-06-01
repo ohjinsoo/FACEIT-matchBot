@@ -6,12 +6,13 @@ import json
 import threading
 import MySQLdb
 from match.matchStats import addMatchToDatabase
-from config import CHANNEL_ID_1, CHANNEL_ID_2
+from config import CHANNEL_ID_1, CHANNEL_ID_2, ENV, SLEEP_LENGTH
 from models.Match import Match
 from models.Player import Player
 from utils.Api import Api
 from utils.DBQuery import DBQuery
 from utils.CircleAssigner import assignCircles
+from utils.Logger import log
 
 addToDatabase = []
 FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg'
@@ -225,29 +226,32 @@ async def searchForAllMatches(players, client, rightBound):
   await printMatches(playersInGame, gameIds, client)
 
 
-# Initialize members here. Don't need to do it more than once as the teams should not change.
-# If a member is added to the team, simply restart bot.
-
 async def startMatchSearch(client):
   teamRes = await Api.getTeamMembers()
   teamResData = await teamRes.json()
   members = teamResData.get('members')
 
-  currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
-  print(currentTime + '::: startMatchSearch', members)
+  log('startMatchSearch w/ ' + str(members))
 
   for i in range(0, len(members)):
     member = members[i]
     DBQuery.insertOrUpdate(member.get('user_id'), member.get('nickname'))
 
   # Initialize the bounds for when to start searching for matches.
+  # If user, make it the current time.
+  # If dev, make it a day before (for testing purposes!)
+
   rightBound = int(time.time())
+
+  if (ENV == 'dev'):
+    rightBound -= 86400
+
   await matchSearch(client, members, rightBound)
 
 
 async def matchSearch(client, members, rightBound):
   await searchForAllMatches(members, client, rightBound)
-  await asyncio.sleep(60)
+  await asyncio.sleep(SLEEP_LENGTH)
 
   # Update the rightBound of match searches.
   rightBound = int(time.time())
