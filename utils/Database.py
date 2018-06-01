@@ -1,6 +1,8 @@
 import aiohttp
 import asyncio
 import MySQLdb
+import time
+
 from config import DB_HOST, DB_USER, DB_PW, DB_NAME
 
 class Database:
@@ -16,6 +18,7 @@ class Database:
 
   def query(self, sql, var):
     run = self.cur.execute(sql, var)
+    print('LAST EXEC: ' + str(self.cur._last_executed))
     self.db.commit()
 
     return run
@@ -38,7 +41,7 @@ class Database:
     log = command % seq
     currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
     print(currentTime + '::: get: ' + log)
-    
+
     self.query(command, seq)
     return [
       dict(

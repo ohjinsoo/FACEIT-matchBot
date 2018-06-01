@@ -10,8 +10,9 @@ class DBQuery:
         'faceit_id' : faceit_id 
     }
     cmd = """
-      SELECT * FROM players WHERE faceit_id = '%(faceit_id)s';
+      SELECT * FROM players WHERE faceit_id = %(faceit_id)s;
     """
+
     return db.contains(cmd, seq)
 
   @staticmethod
@@ -42,7 +43,7 @@ class DBQuery:
     INSERT INTO players
       (`faceit_id`, `nickname`, `kills`, `deaths`, `wins`, `matches`)
       VALUES
-      ('%(faceit_id)s', '%(nickname)s', %(kills)s, %(deaths)s, %(wins)s, %(matches)s);
+      (%(faceit_id)s, %(nickname)s, %(kills)s, %(deaths)s, %(wins)s, %(matches)s);
     """
     db.execute(cmd, seq)
 
@@ -61,14 +62,14 @@ class DBQuery:
           deaths = deaths + %(deaths)s,
           wins = wins + %(wins)s,
           matches = matches + %(matches)s
-        WHERE faceit_id = '%(faceit_id)s';
+        WHERE faceit_id = %(faceit_id)s;
     """
     db.execute(cmd, seq)
 
   @staticmethod
   def removePlayer(faceit_id):
     seq = {'faceit_id': faceit_id}
-    cmd = "DELETE FROM players WHERE faceit_id = '%(faceit_id)s';"
+    cmd = "DELETE FROM players WHERE faceit_id = %(faceit_id)s;"
     db.execute(cmd, seq)
 
   @staticmethod
