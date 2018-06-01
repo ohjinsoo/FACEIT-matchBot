@@ -8,8 +8,10 @@ import MySQLdb
 from match.matchStats import addMatchToDatabase
 from config import CHANNEL_ID_1, CHANNEL_ID_2
 from models.Match import Match
+from models.Player import Player
 from utils.Api import Api
 from utils.DBQuery import DBQuery
+from utils.CircleAssigner import assignCircles
 
 addToDatabase = []
 FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg'
@@ -20,7 +22,7 @@ async def parsePlayerList(playerList):
   ret = ''
 
   for i in range(0, len(playerList)):
-    ret += playerList[i] + '\n'
+    ret += playerList[i].circle + ' ' + playerList[i].nickname + '\n'
 
   return str(ret)
 
@@ -46,6 +48,9 @@ async def createMatchEmbed(match, currPlayers):
 
   startTime = time.strftime('%B %d,  %I:%M %p', time.localtime(match.start))
   endTime = time.strftime('%B %d,  %I:%M %p', time.localtime(match.end))
+
+  match.factionOne = await assignCircles(match.factionOne)
+  match.factionTwo = await assignCircles(match.factionTwo)
 
   matchFields = {
 
@@ -126,8 +131,8 @@ async def printMatches(playersInGame, gameIds, client):
       factionOneList = factionOne.get('roster')
       factionTwoList = factionTwo.get('roster')
 
-    print(server)
-    print(mapName)
+    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
+    print(currentTime + '::: ' + mapName + ' at ' + server)
 
     factionOneMembers = []
     factionTwoMembers = []
@@ -136,15 +141,19 @@ async def printMatches(playersInGame, gameIds, client):
     # Made two separate for loops just incase it is a match with uneven teams (for whatever reason)
 
     for i in range(0, len(factionOneList)):
-      mem = factionOneList[i].get('nickname')
-      factionOneMembers.append(str(mem))
+      player = Player()
+      player.nickname = factionOneList[i].get('nickname')
+      player.party_id = factionOneList[i].get('active_team_id')
+      factionOneMembers.append(player)
 
-      if mem == playersInGame[0]:
+      if player.nickname == playersInGame[0]:
         isFactionOne = True
 
     for i in range(0, len(factionTwoList)):
-      mem = factionTwoList[i].get('nickname')
-      factionTwoMembers.append(str(mem))
+      player = Player()
+      player.nickname = factionTwoList[i].get('nickname')
+      player.party_id = factionTwoList[i].get('active_team_id')
+      factionTwoMembers.append(player)
 
     matchData = {
       'matchId' : matchResData.get('match_id'),
@@ -224,20 +233,21 @@ async def startMatchSearch(client):
   teamResData = await teamRes.json()
   members = teamResData.get('members')
 
-  print('startMatchSearch', members)
+  currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
+  print(currentTime + '::: startMatchSearch', members)
 
   for i in range(0, len(members)):
     member = members[i]
     DBQuery.insertOrUpdate(member.get('user_id'), member.get('nickname'))
 
   # Initialize the bounds for when to start searching for matches.
-  rightBound = int(time.time())
+  rightBound = int(time.time()) - 86400
   await matchSearch(client, members, rightBound)
 
 
 async def matchSearch(client, members, rightBound):
   await searchForAllMatches(members, client, rightBound)
-  await asyncio.sleep(60)
+  await asyncio.sleep(3)
 
   # Update the rightBound of match searches.
   rightBound = int(time.time())

@@ -8,7 +8,9 @@ class Database:
   cur = db.cursor()
 
   def __del__(self):
-    print("Closing MySQL connection...")
+    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
+    print(currentTime + "::: Closing MySQL connection...")
+
     self.cur.close()
     self.db.close()
 
@@ -20,17 +22,23 @@ class Database:
 
   def contains(self, command, seq):
     log = command % seq
-    print('contains: ' + log)
+    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
+    print(currentTime + '::: contains: ' + log)
+
     return self.query(command, seq)
 
   def execute(self, command, seq):
     log = command % seq
-    print('execute: ' + log)
+    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
+    print(currentTime + '::: execute: ' + log)
+
     self.query(command, seq)
 
   def get(self, command, seq):
     log = command % seq
-    print('get: ' + log)
+    currentTime = time.strftime('%B %d,  %I:%M %p', time.localtime(time.time()))
+    print(currentTime + '::: get: ' + log)
+    
     self.query(command, seq)
     return [
       dict(

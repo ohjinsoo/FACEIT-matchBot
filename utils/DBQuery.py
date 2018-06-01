@@ -6,8 +6,12 @@ db = Database()
 class DBQuery:
   @staticmethod
   def getPlayer(faceit_id):
-    seq = { faceit_id: faceit_id }
-    cmd = "SELECT * FROM players WHERE faceit_id = '%(faceit_id)s';"
+    seq = { 
+        'faceit_id' : faceit_id 
+    }
+    cmd = """
+      SELECT * FROM players WHERE faceit_id = '%(faceit_id)s';
+    """
     return db.contains(cmd, seq)
 
   @staticmethod

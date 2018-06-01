@@ -42,6 +42,7 @@ async def addMatchToDatabase(match, members):
 
       # Isn't actually a 'boolean' but rather count. But because the DB should only contain 0 or 1 copy
       # of a player, it acts as a boolean.
+      
       existsInDB = DBQuery.getPlayer(faceit_id)
       kills = player.get('player_stats').get('Kills')
       deaths = player.get('player_stats').get('Deaths')

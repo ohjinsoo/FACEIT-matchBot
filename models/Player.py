@@ -9,3 +9,5 @@ class Player:
     matches = 0
     winRate = 0
     kdRatio = 0
+    party_id = ''
+    circle = ''
