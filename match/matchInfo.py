@@ -200,7 +200,8 @@ async def printMatches(playersInGame, gameIds, client):
       message = await client.send_message(discord.Object(id=CHANNEL_ID_2), outcome)
       await client.edit_message(message=message, embed=embed)
 
-
+    # Update the rightBound of match searches.
+    rightBound = int(time.time())
 
 # Search each of the team members if there is a game that finished
 # between the current time and the time when the bot first logged on.
@@ -253,8 +254,6 @@ async def matchSearch(client, members, rightBound):
   await searchForAllMatches(members, client, rightBound)
   await asyncio.sleep(SLEEP_LENGTH)
 
-  # Update the rightBound of match searches.
-  rightBound = int(time.time())
   global addToDatabase
   if len(addToDatabase) != 0:
     for i in range(0, len(addToDatabase)):
