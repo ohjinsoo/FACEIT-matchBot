@@ -15,30 +15,42 @@ class Database:
     self.cur.execute("SET character_set_connection=utf8mb4")
 
   def __del__(self):
-    log("::: Closing MySQL connection...")
+    log("Closing MySQL connection...")
 
     self.cur.close()
     self.db.close()
 
   def query(self, sql, var):
+
+    self.db.ping(True)
+    
     run = self.cur.execute(sql, var)
     self.db.commit()
 
     return run
 
   def contains(self, command, seq):
+
+    self.db.ping(True)
+
     logString = command % seq
     log('contains: ' + logString)
 
     return self.query(command, seq)
 
   def execute(self, command, seq):
+
+    self.db.ping(True)
+
     logString = command % seq
     log('execute: ' + logString)
 
     self.query(command, seq)
 
   def get(self, command, seq):
+
+    self.db.ping(True)
+
     logString = command % seq
     log('get: ' + logString)
 
