@@ -17,6 +17,15 @@ from utils.Logger import log
 addToDatabase = []
 FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e7/e74d4f1f7730b917c5a33c492a1112973862bb47_full.jpg'
 
+# Initialize the bounds for when to start searching for matches.
+# If user, make it the current time.
+# If dev, make it a day before (for testing purposes!)
+
+rightBound = int(time.time())
+
+if (ENV == 'dev'):
+  rightBound -= 86400
+
 # Parses through the list and adds a new line in between each one.
 
 async def parsePlayerList(playerList):
@@ -193,21 +202,22 @@ async def printMatches(playersInGame, gameIds, client):
     else:
       outcome += ' lost their match :('
 
-    #message = await client.send_message(discord.Object(id=CHANNEL_ID_1), outcome)
-    #await client.edit_message(message=message, embed=embed)
+    message = await client.send_message(discord.Object(id=CHANNEL_ID_1), outcome)
+    await client.edit_message(message=message, embed=embed)
 
     if CHANNEL_ID_2 != 'null':
-      #message = await client.send_message(discord.Object(id=CHANNEL_ID_2), outcome)
-      #await client.edit_message(message=message, embed=embed)
+      message = await client.send_message(discord.Object(id=CHANNEL_ID_2), outcome)
+      await client.edit_message(message=message, embed=embed)
 
     # Update the rightBound of match searches.
+    global rightBound
     rightBound = int(time.time())
 
 # Search each of the team members if there is a game that finished
 # between the current time and the time when the bot first logged on.
 # (bot login time will update each time there is a match found)
 
-async def searchForAllMatches(players, client, rightBound):
+async def searchForAllMatches(players, client):
   playersInGame = []
   gameIds = []
 
@@ -216,6 +226,8 @@ async def searchForAllMatches(players, client, rightBound):
 
   for i in range(0, len(players)):
     player = players[i]
+    
+    global rightBound
     matchRes = await Api.getPlayerMatch(player['user_id'], rightBound)
     matchResData = await matchRes.json()
     match = matchResData.get('items')
@@ -238,20 +250,11 @@ async def startMatchSearch(client):
     member = members[i]
     DBQuery.insertOrUpdate(member.get('user_id'), member.get('nickname'))
 
-  # Initialize the bounds for when to start searching for matches.
-  # If user, make it the current time.
-  # If dev, make it a day before (for testing purposes!)
-
-  rightBound = int(time.time())
-
-  if (ENV == 'dev'):
-    rightBound -= 86400
-
-  await matchSearch(client, members, rightBound)
+  await matchSearch(client, members)
 
 
-async def matchSearch(client, members, rightBound):
-  await searchForAllMatches(members, client, rightBound)
+async def matchSearch(client, members):
+  await searchForAllMatches(members, client)
   await asyncio.sleep(SLEEP_LENGTH)
 
   global addToDatabase
@@ -262,5 +265,5 @@ async def matchSearch(client, members, rightBound):
     addToDatabase = []
 
 
-  await matchSearch(client, members, rightBound)
+  await matchSearch(client, members)
 
