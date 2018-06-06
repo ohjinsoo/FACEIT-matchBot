@@ -193,12 +193,12 @@ async def printMatches(playersInGame, gameIds, client):
     else:
       outcome += ' lost their match :('
 
-    message = await client.send_message(discord.Object(id=CHANNEL_ID_1), outcome)
-    await client.edit_message(message=message, embed=embed)
+    #message = await client.send_message(discord.Object(id=CHANNEL_ID_1), outcome)
+    #await client.edit_message(message=message, embed=embed)
 
     if CHANNEL_ID_2 != 'null':
-      message = await client.send_message(discord.Object(id=CHANNEL_ID_2), outcome)
-      await client.edit_message(message=message, embed=embed)
+      #message = await client.send_message(discord.Object(id=CHANNEL_ID_2), outcome)
+      #await client.edit_message(message=message, embed=embed)
 
     # Update the rightBound of match searches.
     rightBound = int(time.time())
