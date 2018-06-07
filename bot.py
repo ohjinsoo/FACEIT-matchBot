@@ -35,6 +35,6 @@ async def on_message(message):
     elif message.content == '.players':
         await showPlayers(client, message)
 
-    elif message.content.startswith('.rank'):
+    elif message.content.startswith('.ranks'):
         await playerRanking(client, message)
 client.run(BOT_TOKEN)

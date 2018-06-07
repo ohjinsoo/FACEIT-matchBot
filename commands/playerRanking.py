@@ -7,7 +7,7 @@ async def playerRanking(client, message):
   print("playerRanking\n")
   data = {}
 
-  command = message.content[6:]
+  command = message.content[7:]
   if command == 'kills':
     data = await orderByKills()
   elif command == 'kdr':
