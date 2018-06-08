@@ -21,7 +21,7 @@ FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/image
 # If user, make it the current time.
 # If dev, make it a day before (for testing purposes!)
 
-rightBound = int(time.time()) - 8400
+rightBound = int(time.time())
 
 if (ENV == 'dev'):
   rightBound -= 86400
@@ -211,7 +211,7 @@ async def printMatches(playersInGame, gameIds, client):
 
     # Update the rightBound of match searches.
     global rightBound
-    rightBound = int(time.time()) - 3600
+    rightBound = int(time.time())
 
 # Search each of the team members if there is a game that finished
 # between the current time and the time when the bot first logged on.
@@ -261,7 +261,7 @@ async def matchSearch(client, members):
       await addMatchToDatabase(addToDatabase[i], members)
 
     addToDatabase = []
-    
+
   await asyncio.sleep(SLEEP_LENGTH)
   await matchSearch(client, members)
 
