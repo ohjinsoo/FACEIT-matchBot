@@ -27,10 +27,11 @@ async def quote(client, message, data):
   label = data.get('label')
 
   quote = await rankingHelpers.createRankQuote(stats, label)
-  await client.send_message(message.channel, quote)
+  output = title + '\n' + quote
+  await client.send_message(message.channel, output)
 
 async def showPlayersStats():
-  rankings = DBQuery.getRanking("faceit_id", "ASC")
+  rankings = DBQuery.getRanking()
   stats = []
 
   for i in range(0, len(rankings)):
@@ -50,17 +51,17 @@ async def showPlayersStats():
       if avgDeaths[2:] == '.00':
         avgDeaths = avgDeaths[0:2]
 
-    dataString = '{:>5}'.format(avgKills) + ' '
-    dataString += '{:>5}'.format(avgDeaths) + ' '
-    dataString += '{:>4}'.format(wins) + ' '
-    dataString += '{:>4}'.format(matches - wins) + ' '
+    dataString = '{:>5}'.format(avgKills) + '  '
+    dataString += '{:>5}'.format(avgDeaths) + '  '
+    dataString += '{:>5}'.format(wins) + '  '
+    dataString += '{:>6}'.format(matches - wins) + '  '
 
     stats.append([
         player.get('nickname'),
         dataString
     ])
 
-  return {'stats': stats, 'title': 'Player stats', 'label': 'KILLS  DEATHS  WINS  LOSES'}
+  return {'stats': stats, 'title': 'Player Stats', 'label': 'KILLS  DEATHS  WINS  LOSSES'}
 
 async def orderByKills():
   rankings = DBQuery.getRanking()
@@ -69,10 +70,17 @@ async def orderByKills():
 
   for i in range(0, len(rankings)):
     player = rankings[i]
-    kills = int(player.get('kills') or 0)
-    stats.append([player.get('nickname'), kills])
+    avgKills = int(player.get('kills') or 0)
+    matches = int(player.get('matches') or 0)
 
-  return {'stats': stats, 'title': 'Ranking by kills', 'label': 'Kills'}
+    if matches != 0:
+      avgKills = "%.2f" % (avgKills / matches)
+      if avgKills[2:] == '.00':
+        avgKills = avgKills[0:2]
+
+    stats.append([player.get('nickname'), avgKills])
+
+  return {'stats': stats, 'title': 'Ranking by Kills', 'label': 'Kills'}
 
 async def orderByKDR():
   rankings = DBQuery.getRanking('kills/deaths')
@@ -100,7 +108,7 @@ async def orderByWins():
     wins = int(player.get('wins') or 0)
     stats.append([player.get('nickname'), wins])
 
-  return {'stats': stats, 'title': 'Ranking by wins', 'label': 'Wins'}
+  return {'stats': stats, 'title': 'Ranking by Wins', 'label': 'Wins'}
 
 
 async def orderByWR():
@@ -117,4 +125,4 @@ async def orderByWR():
         ('∞ ' if matches == 0 else "%.2f" % (wins / matches * 100)) + '%'
     ])
 
-  return {'stats': stats, 'title': 'Ranking by winrate', 'label': 'Winrate'}
+  return {'stats': stats, 'title': 'Ranking by Winrate', 'label': 'Winrate'}
