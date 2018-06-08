@@ -78,6 +78,7 @@ async def orderByKills():
       if avgKills[2:] == '.00':
         avgKills = avgKills[0:2]
 
+    avgKills = '{:>5}'.format(avgKills)
     stats.append([player.get('nickname'), avgKills])
 
   return {'stats': stats, 'title': 'Ranking by Kills', 'label': 'Kills'}
@@ -108,6 +109,7 @@ async def orderByWins():
     wins = int(player.get('wins') or 0)
     stats.append([player.get('nickname'), wins])
 
+  avgKills = '{:>5}'.format(wins)
   return {'stats': stats, 'title': 'Ranking by Wins', 'label': 'Wins'}
 
 
@@ -122,7 +124,7 @@ async def orderByWR():
 
     stats.append([
         player.get('nickname'),
-        ('∞ ' if matches == 0 else "%.2f" % (wins / matches * 100)) + '%'
+        ('∞' if matches == 0 else "%.2f" % (wins / matches * 100)) + ' %'
     ])
 
   return {'stats': stats, 'title': 'Ranking by Winrate', 'label': 'Winrate'}
