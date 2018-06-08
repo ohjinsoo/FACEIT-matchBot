@@ -18,7 +18,7 @@ async def on_ready():
     log('Logged in as: %s [%s]' % (client.user.name, client.user.id))
 
     # Start 60s timer to look for FACEIT matches.
-    await startMatchSearch(client)
+    # await startMatchSearch(client)
 
 @client.event
 async def on_message(message):

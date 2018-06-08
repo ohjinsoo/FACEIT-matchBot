@@ -19,15 +19,15 @@ async def playerRanking(client, message):
   else:
     data = await showPlayersStats()
 
-  await embed(client, message, data)
+  await quote(client, message, data)
 
-async def embed(client, message, data):
+async def quote(client, message, data):
   stats = data.get('stats')
   title = data.get('title')
   label = data.get('label')
 
-  embed = await rankingHelpers.createRankEmbed(stats, title, label)
-  await client.send_message(message.channel, embed=embed)
+  quote = await rankingHelpers.createRankQuote(stats, label)
+  await client.send_message(message.channel, quote)
 
 async def showPlayersStats():
   rankings = DBQuery.getRanking("faceit_id", "ASC")
@@ -35,17 +35,32 @@ async def showPlayersStats():
 
   for i in range(0, len(rankings)):
     player = rankings[i]
-    kills = int(player.get('kills') or 0)
-    deaths = int(player.get('deaths') or 0)
+    avgKills = int(player.get('kills') or 0)
+    avgDeaths = int(player.get('deaths') or 0)
+
     wins = int(player.get('wins') or 0)
     matches = int(player.get('matches') or 0)
 
+    if matches != 0:
+      avgKills = "%.2f" % (avgKills / matches)
+      if avgKills[2:] == '.00':
+        avgKills = avgKills[0:2]
+
+      avgDeaths = "%.2f" % (avgDeaths / matches)
+      if avgDeaths[2:] == '.00':
+        avgDeaths = avgDeaths[0:2]
+
+    dataString = '{:>5}'.format(avgKills) + ' '
+    dataString += '{:>5}'.format(avgDeaths) + ' '
+    dataString += '{:>4}'.format(wins) + ' '
+    dataString += '{:>4}'.format(matches - wins) + ' '
+
     stats.append([
         player.get('nickname'),
-        '%s/%s %s/%s' % (kills, deaths, wins, matches - wins)
+        dataString
     ])
 
-  return {'stats': stats, 'title': 'Player stats', 'label': 'K/D W/L'}
+  return {'stats': stats, 'title': 'Player stats', 'label': 'KILLS  DEATHS  WINS  LOSES'}
 
 async def orderByKills():
   rankings = DBQuery.getRanking()
@@ -99,7 +114,7 @@ async def orderByWR():
 
     stats.append([
         player.get('nickname'),
-        '∞%' if matches == 0 else "%.2f" % (wins / matches * 100)
+        ('∞ ' if matches == 0 else "%.2f" % (wins / matches * 100)) + '%'
     ])
 
   return {'stats': stats, 'title': 'Ranking by winrate', 'label': 'Winrate'}
