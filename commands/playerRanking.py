@@ -81,7 +81,7 @@ async def orderByKills():
     avgKills = '{:>5}'.format(avgKills)
     stats.append([player.get('nickname'), avgKills])
 
-  return {'stats': stats, 'title': 'Ranking by Kills', 'label': 'Kills'}
+  return {'stats': stats, 'title': 'Ranking by Kills', 'label': 'KILLS'}
 
 async def orderByKDR():
   rankings = DBQuery.getRanking('kills/deaths')
@@ -94,7 +94,7 @@ async def orderByKDR():
 
     stats.append([
       player.get('nickname'),
-      '∞' if deaths == 0 else "%.2f" % (kills / deaths)
+      '{:>4}'.format('∞' if deaths == 0 else "%.2f" % (kills / deaths))
     ])
 
   return {'stats': stats, 'title': 'Ranking by KDR', 'label': 'KDR'}
@@ -107,10 +107,9 @@ async def orderByWins():
   for i in range(0, len(rankings)):
     player = rankings[i]
     wins = int(player.get('wins') or 0)
-    stats.append([player.get('nickname'), wins])
+    stats.append([player.get('nickname'), '{:>5}'.format(wins)])
 
-  avgKills = '{:>5}'.format(wins)
-  return {'stats': stats, 'title': 'Ranking by Wins', 'label': 'Wins'}
+  return {'stats': stats, 'title': 'Ranking by Wins', 'label': 'WINS'}
 
 
 async def orderByWR():
@@ -124,7 +123,7 @@ async def orderByWR():
 
     stats.append([
         player.get('nickname'),
-        ('∞' if matches == 0 else "%.2f" % (wins / matches * 100)) + ' %'
+        '{:>7}'.format(('∞' if matches == 0 else "%.2f" % (wins / matches * 100)) + ' %')
     ])
 
-  return {'stats': stats, 'title': 'Ranking by Winrate', 'label': 'Winrate'}
+  return {'stats': stats, 'title': 'Ranking by Winrate', 'label': 'WINRATE'}
