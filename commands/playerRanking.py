@@ -123,7 +123,7 @@ async def orderByWR():
 
     stats.append([
         player.get('nickname'),
-        '{:>7}'.format(('∞' if matches == 0 else "%.2f" % (wins / matches * 100)) + ' %')
+        '{:>8}'.format(('∞' if matches == 0 else "%.2f" % (wins / matches * 100)) + ' %')
     ])
 
   return {'stats': stats, 'title': 'Ranking by Winrate', 'label': 'WINRATE'}
