@@ -21,7 +21,7 @@ FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/image
 # If user, make it the current time.
 # If dev, make it a day before (for testing purposes!)
 
-rightBound = int(time.time())
+rightBound = int(time.time()) 
 
 if (ENV == 'dev'):
   rightBound -= 86400
@@ -116,7 +116,7 @@ async def printMatches(playersInGame, gameIds, client):
 
 
     matchRes = await Api.getMatchInfo(currGameId)
-    if matchRes.status == 404:
+    if matchRes.status != 200:
       return
 
     matchResData = await matchRes.json()
@@ -197,6 +197,7 @@ async def printMatches(playersInGame, gameIds, client):
       outcome += ', **' + currPlayers[i] + '**'
 
     # if embed == green, add ' won!' , else add ' lost :('
+
     if (match.winner == 'faction1' and match.isFactionOne) or (match.winner == 'faction2' and not match.isFactionOne):
       outcome += ' won their match!'
     else:
@@ -229,10 +230,14 @@ async def searchForAllMatches(players, client):
     
     global rightBound
     matchRes = await Api.getPlayerMatch(player['user_id'], rightBound)
+
+    if matchRes != 200:
+      continue
+
     matchResData = await matchRes.json()
     match = matchResData.get('items')
 
-    if matchRes.status == 200 and len(match) != 0:
+    if len(match) != 0:
       playersInGame.append(player['nickname'])
       gameIds.append(match[0].get('match_id'))
 
