@@ -231,7 +231,7 @@ async def searchForAllMatches(players, client):
     global rightBound
     matchRes = await Api.getPlayerMatch(player['user_id'], rightBound)
 
-    if matchRes != 200:
+    if matchRes.status != 200:
       continue
 
     matchResData = await matchRes.json()
