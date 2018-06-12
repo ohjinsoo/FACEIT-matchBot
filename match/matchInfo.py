@@ -5,6 +5,7 @@ import time
 import json
 import threading
 import MySQLdb
+import gc
 from match.matchStats import addMatchToDatabase
 from config import CHANNEL_ID_1, CHANNEL_ID_2, ENV, SLEEP_LENGTH
 from models.Match import Match
@@ -268,5 +269,6 @@ async def matchSearch(client, members):
     addToDatabase = []
 
   await asyncio.sleep(SLEEP_LENGTH)
+  gc.collect()
   await matchSearch(client, members)
 
