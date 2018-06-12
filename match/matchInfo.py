@@ -242,7 +242,8 @@ async def searchForAllMatches(players, client):
       playersInGame.append(player['nickname'])
       gameIds.append(match[0].get('match_id'))
 
-  await printMatches(playersInGame, gameIds, client)
+  if len(playersInGame) != 0:
+    await printMatches(playersInGame, gameIds, client)
 
 
 async def startMatchSearch(client):
