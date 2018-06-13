@@ -257,19 +257,13 @@ async def startMatchSearch(client):
     member = members[i]
     DBQuery.insertOrUpdate(member.get('user_id'), member.get('nickname'))
 
-  await matchSearch(client, members)
+  while True:
+    await searchForAllMatches(members, client)
+    global addToDatabase
+    if len(addToDatabase) != 0:
+      for i in range(0, len(addToDatabase)):
+        await addMatchToDatabase(addToDatabase[i], members)
 
+      addToDatabase = []
 
-async def matchSearch(client, members):
-  await searchForAllMatches(members, client)
-  global addToDatabase
-  if len(addToDatabase) != 0:
-    for i in range(0, len(addToDatabase)):
-      await addMatchToDatabase(addToDatabase[i], members)
-
-    addToDatabase = []
-
-  await asyncio.sleep(SLEEP_LENGTH)
-  gc.collect()
-  await matchSearch(client, members)
-
+    await asyncio.sleep(SLEEP_LENGTH)
