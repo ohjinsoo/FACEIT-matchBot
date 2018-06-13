@@ -13,8 +13,6 @@ class Request:
   async def get(self, url):
     log('req: %s' % url)
 
-    try:
-      body = self.client.get(FACEIT_URL + url)
-      return await body
-    except Exception as e:
-      log("exception at Request.get(): " + str(e))
+    body = await self.client.get(FACEIT_URL + url)
+    log('Rate Limit Left: ' + body.headers['X-Ratelimit-Remaining-Hour'])
+    return body
