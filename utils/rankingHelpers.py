@@ -23,18 +23,3 @@ async def createRankQuote(data, label = ''):
     stats += str(player[1]) + '\n'
 
   return '```' + stats + '```'
-
-async def sortByAvgKills(rankings):
-  for i in range(0, len(rankings)):
-    kills = int(rankings[i].get('kills') or 0)
-    deaths = int(rankings[i].get('deaths') or 0)
-    matches = int(rankings[i].get('matches') or 0)
-
-    if matches != 0:
-      rankings[i]['kills'] = float(kills / matches)
-      rankings[i]['deaths'] = float(deaths / matches)
-
-  ret = sorted(rankings, key=lambda k: k['kills'], reverse=True)
-
-
-  return ret
