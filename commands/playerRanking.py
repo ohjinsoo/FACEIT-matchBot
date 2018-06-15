@@ -32,24 +32,24 @@ async def quote(client, message, data):
 
 async def showPlayersStats():
   rankings = DBQuery.getRanking()
+  rankings = await rankingHelpers.sortByAvgKills(rankings)
   stats = []
 
   for i in range(0, len(rankings)):
     player = rankings[i]
-    avgKills = int(player.get('kills') or 0)
-    avgDeaths = int(player.get('deaths') or 0)
+    avgKills = float(player.get('kills') or 0)
+    avgDeaths = float(player.get('deaths') or 0)
 
     wins = int(player.get('wins') or 0)
     matches = int(player.get('matches') or 0)
 
-    if matches != 0:
-      avgKills = "%.2f" % (avgKills / matches)
-      if avgKills[2:] == '.00':
-        avgKills = avgKills[0:2]
+    avgKills = "%.2f" % avgKills
+    if avgKills[len(avgKills) - 3:] == '.00':
+      avgKills = avgKills[0:len(avgKills) - 3]
 
-      avgDeaths = "%.2f" % (avgDeaths / matches)
-      if avgDeaths[2:] == '.00':
-        avgDeaths = avgDeaths[0:2]
+    avgDeaths = "%.2f" % avgDeaths
+    if avgDeaths[len(avgDeaths) - 3:] == '.00':
+      avgDeaths = avgDeaths[0:len(avgDeaths) - 3]
 
     dataString = '{:>5}'.format(avgKills) + '  '
     dataString += '{:>5}'.format(avgDeaths) + '  '

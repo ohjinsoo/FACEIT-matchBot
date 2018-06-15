@@ -81,4 +81,5 @@ class DBQuery:
       FROM players
       ORDER BY %(column)s %(order)s;
     """ % {'column': column, 'order': order}
+    
     return db.get(cmd, seq)

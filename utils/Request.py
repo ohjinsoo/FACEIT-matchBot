@@ -6,10 +6,6 @@ from utils.Logger import log
 class Request:
   client = aiohttp.ClientSession(headers={'Authorization': 'Bearer ' + FACEIT_KEY})
 
-  def __init__(self):
-    if self.client is None:
-      self.client = aiohttp.ClientSession(headers={'Authorization': 'Bearer ' + FACEIT_KEY})
-
   async def get(self, url):
     log('req: %s' % url)
 
