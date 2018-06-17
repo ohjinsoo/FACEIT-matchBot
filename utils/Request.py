@@ -10,5 +10,8 @@ class Request:
     log('req: %s' % url)
 
     body = await self.client.get(FACEIT_URL + url)
-    log('Rate Limit Left: ' + body.headers['X-Ratelimit-Remaining-Hour'])
+    try:
+      log('Rate Limit Left: ' + body.headers['X-Ratelimit-Remaining-Hour'])
+    except:
+      log('Cant find rate limit, heres the body: ' + str(body))
     return body
