@@ -22,7 +22,7 @@ FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/image
 # If user, make it the current time.
 # If dev, make it a day before (for testing purposes!)
 
-rightBound = int(time.time()) - 2400
+rightBound = int(time.time())
 
 if (ENV == 'dev'):
   rightBound -= 86400
@@ -227,20 +227,24 @@ async def searchForAllMatches(players, client):
     return
 
   for i in range(0, len(players)):
-    player = players[i]
-    
-    global rightBound
-    matchRes = await Api.getPlayerMatch(player['user_id'], rightBound)
+    try:
+      player = players[i]
+      
+      global rightBound
+      matchRes = await Api.getPlayerMatch(player['user_id'], rightBound)
 
-    if matchRes.status != 200:
-      continue
+      if matchRes.status != 200:
+        continue
 
-    matchResData = await matchRes.json()
-    match = matchResData.get('items')
+      matchResData = await matchRes.json()
+      match = matchResData.get('items')
 
-    if len(match) != 0:
-      playersInGame.append(player['nickname'])
-      gameIds.append(match[0].get('match_id'))
+      if len(match) != 0:
+        playersInGame.append(player['nickname'])
+        gameIds.append(match[0].get('match_id'))
+      except:
+        log('Error in match search for ' + str(player['user_id']))
+        continue
 
   if len(playersInGame) != 0:
     await printMatches(playersInGame, gameIds, client)
