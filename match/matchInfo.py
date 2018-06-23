@@ -242,8 +242,8 @@ async def searchForAllMatches(players, client):
       if len(match) != 0:
         playersInGame.append(player['nickname'])
         gameIds.append(match[0].get('match_id'))
-    except:
-      log('Error in match search for ' + str(player['user_id']))
+    except Exception as e:
+      log('Exception! ' + str(e))
       continue
 
   if len(playersInGame) != 0:
