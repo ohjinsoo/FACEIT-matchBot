@@ -22,7 +22,7 @@ FACEIT_STEAM_ICON = 'https://steamcdn-a.akamaihd.net/steamcommunity/public/image
 # If user, make it the current time.
 # If dev, make it a day before (for testing purposes!)
 
-rightBound = int(time.time())
+rightBound = int(time.time()) - 3600;
 
 if (ENV == 'dev'):
   rightBound -= 86400
