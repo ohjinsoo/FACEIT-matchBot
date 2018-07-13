@@ -212,8 +212,10 @@ async def printMatches(playersInGame, gameIds, client):
       await client.edit_message(message=message, embed=embed)
 
     # Update the rightBound of match searches.
+    # - 120 because the search happens every 2 minutes.
+    
     global rightBound
-    rightBound = int(time.time())
+    rightBound = int(time.time()) - 120
 
 # Search each of the team members if there is a game that finished
 # between the current time and the time when the bot first logged on.
