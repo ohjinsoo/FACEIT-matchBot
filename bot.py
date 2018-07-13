@@ -8,6 +8,7 @@ from match.matchInfo import startMatchSearch
 from commands.playerStats import stats
 from commands.showTrackedPlayers import showPlayers
 from commands.playerRanking import playerRanking
+from commands.recordMatch import record
 from utils.DBQuery import DBQuery
 from utils.Logger import log
 
@@ -24,6 +25,7 @@ async def on_ready():
 async def on_message(message):
     if message.content == '.commands':
         commands = '``` List of Commands: [] - required, <> - optional'
+        commands += '\n    .record [matchID]  <-  ADMIN COMMAND'
         commands += '\n    .stats [player]'
         commands += '\n    .players'
         commands += '\n    .ranks <kills/kdr/wins/winrate>```'
@@ -34,6 +36,9 @@ async def on_message(message):
 
     elif message.content == '.players':
         await showPlayers(client, message)
+
+    elif message.content.startswith('.record '):
+        await record(client, message)
 
     elif message.content.startswith('.ranks'):
         await playerRanking(client, message)
